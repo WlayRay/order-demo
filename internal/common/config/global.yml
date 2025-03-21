@@ -1,0 +1,15 @@
+fallback-grpc-addr: 127.0.0.1:12306
+zap-level: debug
+
+order:
+  service-name: order
+  server-to-run: http
+  http-addr: 0.0.0.0:9000
+  grpc-addr: 0.0.0.0:12306
+
+
+stock:
+  service-name: stock
+  server-to-run: grpc
+  http-addr: 0.0.0.0:9001
+  grpc-addr: 0.0.0.0:12307
