@@ -7,7 +7,6 @@ order:
   http-addr: 0.0.0.0:9000
   grpc-addr: 0.0.0.0:12306
 
-
 stock:
   service-name: stock
   server-to-run: grpc
