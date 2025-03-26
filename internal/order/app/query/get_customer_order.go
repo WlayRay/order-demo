@@ -18,14 +18,6 @@ type getCustomerOrderHandler struct {
 	orderRepo domain.Repository
 }
 
-func (g getCustomerOrderHandler) Handle(ctx context.Context, query GetCustomerOrder) (*domain.Order, error) {
-	o, err := g.orderRepo.Get(ctx, query.OrderID, query.CustomerID)
-	if err != nil {
-		return nil, err
-	}
-	return o, nil
-}
-
 func NewGetCustomerOrderHandler(orderRepo domain.Repository, logger *zap.Logger, metricClient decorator.MetricsClient) GetCustomerOrderHandler {
 	if orderRepo == nil {
 		panic("orderRepo is nil")
@@ -35,4 +27,12 @@ func NewGetCustomerOrderHandler(orderRepo domain.Repository, logger *zap.Logger,
 		logger,
 		metricClient,
 	)
+}
+
+func (g getCustomerOrderHandler) Handle(ctx context.Context, query GetCustomerOrder) (*domain.Order, error) {
+	o, err := g.orderRepo.Get(ctx, query.OrderID, query.CustomerID)
+	if err != nil {
+		return nil, err
+	}
+	return o, nil
 }

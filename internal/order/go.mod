@@ -11,6 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/spf13/viper v1.19.0
+	go.uber.org/zap v1.21.0
 	google.golang.org/grpc v1.67.3
 	google.golang.org/protobuf v1.36.1
 )
@@ -51,7 +52,6 @@ require (
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect

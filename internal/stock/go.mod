@@ -9,6 +9,7 @@ replace github.com/WlayRay/order-demo/common => ../common
 require (
 	github.com/WlayRay/order-demo/common v0.0.0-00010101000000-000000000000
 	github.com/spf13/viper v1.20.0
+	go.uber.org/zap v1.21.0
 	google.golang.org/grpc v1.71.0
 )
 
@@ -44,7 +45,6 @@ require (
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect

@@ -10,6 +10,7 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.21.0
+	golang.org/x/net v0.33.0
 	google.golang.org/grpc v1.67.3
 	google.golang.org/protobuf v1.36.1
 )
@@ -52,7 +53,6 @@ require (
 	golang.org/x/arch v0.4.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
-	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241223144023-3abc09e42ca8 // indirect
