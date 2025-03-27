@@ -9,6 +9,7 @@ import (
 	"github.com/WlayRay/order-demo/payment/app"
 	"github.com/WlayRay/order-demo/payment/app/command"
 	"github.com/WlayRay/order-demo/payment/infrastructure/processor"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -25,8 +26,7 @@ func NewApplication(ctx context.Context) (app.Application, func()) {
 	}
 
 	orderGRPC := adapters.NewOrderGRPC(orderClient)
-	//stripeProcessor := processor.NewStripeProcessor(viper.GetString("stripe-key"))
-	stripeProcessor := processor.NewStripeProcessor("sk_test_51R75G9PNegMNE0WflGrU5yaYRIJ02i014X5tDMqvNGUCsTsfCymEdbvcFu3heZBBCZnQmEWA0aXH8LeP3NmA8KjV00Q5edwfzM")
+	stripeProcessor := processor.NewStripeProcessor(viper.GetString("stripe-key"))
 
 	return newApplication(ctx, orderGRPC, stripeProcessor), func() {
 		_ = closeOrderClient()
