@@ -2,9 +2,11 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"github.com/WlayRay/order-demo/common/discovery/etcd"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"math/rand"
 	"time"
 )
 
@@ -33,7 +35,7 @@ func RegisterToETCD(ctx context.Context, serviceName string) (func() error, erro
 			time.Sleep(time.Second * 2)
 		}
 	}()
-	zap.L().Info("registered to consul",
+	zap.L().Info("registered to etcd",
 		zap.String("serviceName", serviceName),
 		zap.String("instanceID", instanceID))
 
@@ -42,4 +44,23 @@ func RegisterToETCD(ctx context.Context, serviceName string) (func() error, erro
 		defer cancel()
 		return registry.Unregister(timeoutCtx, instanceID, serviceName)
 	}, nil
+}
+
+func GetServiceAddr(ctx context.Context, serviceName string) (string, error) {
+	registry, err := etcd.GetEtcdClient(viper.GetStringSlice("etcd.endpoints"))
+	if err != nil {
+		return "", err
+	}
+	addresses, discoverErr := registry.Discover(ctx, serviceName)
+	if discoverErr != nil {
+		return "", discoverErr
+	}
+	if len(addresses) == 0 {
+		return "", fmt.Errorf("%s no alive service found", serviceName)
+	}
+	i := rand.Intn(len(addresses))
+	zap.L().Info("get service addr",
+		zap.String("serviceName", serviceName),
+		zap.String("addr", addresses[i]))
+	return addresses[i], nil
 }

@@ -13,7 +13,6 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"time"
 )
 
 func init() {
@@ -24,11 +23,9 @@ func init() {
 }
 
 func main() {
-	//fmt.Println("环境变量:", os.Getenv("STRIPE_KEY")) // 验证环境变量是否生效
-	//zap.L().Fatal(viper.GetString("stripe-key"))
 	serviceName := viper.GetString("order.service-name")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	application, cleanup := service.NewApplication(ctx)

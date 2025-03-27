@@ -9,7 +9,9 @@ replace github.com/WlayRay/order-demo/common => ../common
 require (
 	github.com/WlayRay/order-demo/common v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.9.1
+	github.com/golang/protobuf v1.5.3
 	github.com/oapi-codegen/runtime v1.1.1
+	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.21.0
 	google.golang.org/grpc v1.67.3
@@ -31,7 +33,6 @@ require (
 	github.com/go-playground/validator/v10 v10.14.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

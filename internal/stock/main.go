@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"time"
 )
 
 func init() {
@@ -26,7 +25,7 @@ func main() {
 	serviceName := viper.GetString("stock.service-name")
 	serverType := viper.GetString("stock.server-to-run")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	application := service.NewApplication(ctx)

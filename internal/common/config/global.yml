@@ -25,4 +25,10 @@ payment:
   http-addr: 0.0.0.0:9002
   grpc-addr: 0.0.0.0:12308
 
+rabbitmq:
+  user: guest
+  password: guest
+  host: 127.0.0.1
+  port: 5672
+
 stripe-key: "${STRIPE_KEY}"

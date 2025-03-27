@@ -72,8 +72,8 @@ func (r Registry) Discover(ctx context.Context, serviceName string) ([]string, e
 	}
 	addresses := make([]string, 0, resp.Count)
 	for _, kv := range resp.Kvs {
-		ip := strings.Split(string(kv.Key), "/")[2]
-		addresses = append(addresses, ip)
+		ips := strings.Split(string(kv.Key), "/")
+		addresses = append(addresses, ips[(len(ips)-1)])
 	}
 	return addresses, nil
 }
@@ -122,10 +122,12 @@ func (r Registry) HealthCheck(instanceID, serviceName string) error {
 							zap.String("instanceID", instanceID))
 						return
 					}
-					zap.L().Debug("keep alive success",
-						zap.String("serviceName", serviceName),
-						zap.String("instanceID", instanceID),
-						zap.Int64("ttl", resp.TTL))
+					if true == false {
+						zap.L().Debug("keep alive success",
+							zap.String("serviceName", serviceName),
+							zap.String("instanceID", instanceID),
+							zap.Int64("ttl", resp.TTL))
+					}
 				}
 			}
 		}()

@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/oapi-codegen/runtime v1.1.1
+	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/spf13/viper v1.19.0
 	go.etcd.io/etcd/client/v3 v3.5.12
 	go.uber.org/zap v1.21.0

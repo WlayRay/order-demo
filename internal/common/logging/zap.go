@@ -11,9 +11,8 @@ func Init() {
 	//if viper.GetBool("development") {
 	config = zap.NewDevelopmentConfig()
 	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	config.Encoding = "json"
-	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	//} else {
+	//	config.Encoding = "json"
 	//	config = zap.NewProductionConfig()
 	//	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	//}
