@@ -1,6 +1,12 @@
 fallback-grpc-addr: 0.0.0.0:12305
 zap-level: debug
 
+etcd:
+  endpoints:
+    - "0.0.0.0:2379"
+    - "0.0.0.0:2380"
+    - "0.0.0.0:2381"
+
 order:
   service-name: order
   server-to-run: http
@@ -12,3 +18,11 @@ stock:
   server-to-run: grpc
   http-addr: 0.0.0.0:9001
   grpc-addr: 0.0.0.0:12307
+
+payment:
+  service-name: payment
+  server-to-run: http
+  http-addr: 0.0.0.0:9002
+  grpc-addr: 0.0.0.0:12308
+
+stripe-key: "${STRIPE_KEY}"

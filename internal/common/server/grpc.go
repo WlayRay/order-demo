@@ -5,32 +5,9 @@ import (
 	grpcTags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"net"
 )
-
-// init 初始化 zap 全局日志器
-func init() {
-	config := zap.NewProductionConfig()
-	zapLevel := viper.GetString("zap-level")
-	switch zapLevel {
-	case "debug":
-		config.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)
-	case "info":
-		config.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
-	case "warn":
-		config.Level = zap.NewAtomicLevelAt(zapcore.WarnLevel)
-	case "error":
-		config.Level = zap.NewAtomicLevelAt(zapcore.ErrorLevel)
-	case "fatal":
-	}
-	logger, _ := config.Build(
-		zap.AddCaller(),
-		zap.AddCallerSkip(1),
-	)
-	zap.ReplaceGlobals(logger)
-}
 
 // RunGRPCServer 启动 gRPC 服务
 func RunGRPCServer(serviceName string, registerServer func(server *grpc.Server)) {
