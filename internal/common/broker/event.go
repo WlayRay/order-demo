@@ -1,3 +1,4 @@
+// Package broker provides primitives to interact with message brokers.
 package broker
 
 const (

@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// MetricsClient is an interface for metrics clients.
 type MetricsClient interface {
 	Inc(key string, value int)
 }

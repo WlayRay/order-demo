@@ -9,7 +9,7 @@
         html {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            background: linear-gradient(135deg, #60e0fdbf, #10b9e3);
             color: #fff;
             font-family: 'Arial', sans-serif;
         }
@@ -33,54 +33,50 @@
             left: 50%;
             transform: translate(-50%, -50%);
             padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            width: 220px;
+            height: 120px;
             transition: all 0.3s ease;
         }
 
         .ready-popup p,
         .after-payment-popup p {
-            margin: 0;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .close-btn {
-            margin-top: 15px;
-            padding: 8px 16px;
-            background: #2193b0;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .close-btn:hover {
-            background: #1a7bb9;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #555;
+            /* 深灰色文字 */
+            line-height: 1.6;
+            /* 增加行间距 */
         }
 
         .after-payment-popup a {
-            margin-top: 10px;
-            padding: 8px 16px;
-            background: #4caf50;
+            margin-top: 15px;
+            padding: 6px 18px;
+            /* 缩小按钮大小 */
+            background: #04cc0eb9;
             color: #fff;
-            border-radius: 5px;
+            border-radius: 6px;
             text-decoration: none;
             transition: background 0.3s ease;
+            text-align: center;
         }
 
         .after-payment-popup a:hover {
-            background: #43a047;
+            background: #388e3c;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 
 <body>
-    <section>
-        <p>您已成功下单！</p>
-        <p>订单状态：<span id="orderStatus">等待中...</span></p>
+    <section id="main-section">
+        <p id="order-message">您已成功下单！</p>
+        <p id="order-status">订单状态：<span id="orderStatus">等待中...</span></p>
         <div class="ready-popup">
             <p>您的订单正在处理中...请稍后</p>
             <p style="color: #2193b0; margin: 12px;">订单号：<b><span id="orderId"></span></b></p>
@@ -89,6 +85,7 @@
 
         <div class="after-payment-popup">
             <p>等待支付中...</p>
+            <p>您已成功下单!</p>
             <a href="#" id="payment-link">去支付</a>
         </div>
     </section>
@@ -101,32 +98,23 @@
             customerID: customerID,
             orderID: orderID,
             status: 'pending',
-        }
+        };
+
         const getOrder = async () => {
             try {
                 const response = await fetch(`/api/customer/${customerID}/orders/${orderID}`);
                 const data = await response.json();
                 console.log("data = ", data);
 
-                /*
-                {
-                    "code": 0,
-                    "message": "success",
-                    "data": {
-                        "Order": {
-                            "ID": 1,
-                            "CustomerID": 1,
-                            "Status": "waiting_for_payment",
-                            "PaymentLink": "https://example.com/payment"
-                        }
-                    }
-                }
-                */
                 if (data.data.Order.Status === 'waiting_for_payment') {
                     order.Status = '等待支付中...';
                     document.getElementById('orderStatus').innerText = order.Status;
                     document.querySelector('.after-payment-popup').style.display = 'block';
                     document.getElementById('payment-link').href = data.data.Order.PaymentLink;
+
+                    // 隐藏背景多余文字
+                    document.getElementById('order-message').classList.add('hidden');
+                    document.getElementById('order-status').classList.add('hidden');
                 } else if (data.data.Order.Status === 'paid') {
                     order.Status = '支付成功，请稍等...';
                     document.getElementById('orderStatus').innerText = order.Status;
@@ -137,6 +125,10 @@
                     document.querySelector('.ready-popup').style.display = 'block';
                     document.getElementById('orderID').innerText = orderID;
                     document.getElementById('orderStatus').innerText = order.Status;
+
+                    // 恢复背景文字
+                    document.getElementById('order-message').classList.remove('hidden');
+                    document.getElementById('order-status').classList.remove('hidden');
                 } else {
                     setTimeout(getOrder, 5000);
                 }

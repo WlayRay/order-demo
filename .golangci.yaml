@@ -1,0 +1,104 @@
+---
+version: "2"
+service:
+  golangci-lint-version: 2.0.2  # 仅在特定场景下需要
+
+run:
+  timeout: 30m
+  tests: false
+
+issues:
+  max-same-issues: 0
+  exclude-rules:
+    - path: conversion\.go
+      linters: [ineffassign]
+  exclude-files:
+    - ^zz_generated.*
+
+linters:
+  disable-all: true
+  enable:
+    - ineffassign
+    - nakedret
+    - revive
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+    - lll
+
+linters-settings:
+  nakedret:
+    max-func-lines: 5
+  revive:
+    ignore-generated-header: false
+    severity: error
+    confidence: 0.8
+    enable-all-rules: false
+    rules:
+      - name: blank-imports
+        severity: error
+        disabled: false
+      - name: context-as-argument
+        severity: error
+        disabled: false
+      - name: dot-imports
+        severity: error
+        disabled: false
+      - name: error-return
+        severity: error
+        disabled: false
+      - name: error-naming
+        severity: error
+        disabled: false
+      - name: if-return
+        severity: error
+        disabled: false
+      - name: increment-decrement
+        severity: error
+        disabled: false
+      - name: var-declaration
+        severity: error
+        disabled: false
+      - name: package-comments
+        severity: error
+        disabled: false
+      - name: range
+        severity: error
+        disabled: false
+      - name: receiver-naming
+        severity: error
+        disabled: false
+      - name: time-naming
+        severity: error
+        disabled: false
+      - name: indent-error-flow
+        severity: error
+        disabled: false
+      - name: errorf
+        severity: error
+        disabled: false
+      - name: context-keys-type
+        severity: error
+        disabled: false
+      - name: error-strings
+        severity: error
+        disabled: false
+      - name: var-naming
+        disabled: false
+        arguments:
+          # The following is the configuration for var-naming rule, the first element is the allow list and the second element is the deny list.
+          - [] # AllowList: leave it empty to use the default (empty, too). This means that we're not relaxing the rule in any way, i.e. elementId will raise a violation, it should be elementID, refer to the next line to see the list of denied initialisms.
+          - ["GRPC", "WAL"] # DenyList: Add GRPC and WAL to strict the rule not allowing instances like Wal or Grpc. The default values are located at commonInitialisms, refer to: https://github.com/mgechev/revive/blob/v1.3.7/lint/utils.go#L93-L133.
+      # TODO: enable the following rules
+      - name: exported
+        disabled: true
+      - name: unexported-return
+        disabled: true
+  staticcheck:
+    checks:
+      - all
+      - -SA1019
+      - -SA2002
+  lll:
+    line-length: 150  # 自定义行长度限制

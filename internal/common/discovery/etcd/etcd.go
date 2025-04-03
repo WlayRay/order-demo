@@ -14,6 +14,7 @@ type Registry struct {
 	client *etcdv3.Client
 }
 
+// GetEtcdClient returns a new etcd registry client.
 func GetEtcdClient(etcdEndpoints []string) (*Registry, error) {
 	once.Do(func() {
 		cli, e := etcdv3.New(etcdv3.Config{
@@ -39,6 +40,7 @@ func GetEtcdClient(etcdEndpoints []string) (*Registry, error) {
 	return etcdClient, nil
 }
 
+// Register registers a service instance in etcd.
 func (r Registry) Register(ctx context.Context, instanceID, serviceName, hostPort string) error {
 	parts := strings.Split(hostPort, ":")
 	if len(parts) != 2 {
@@ -48,15 +50,16 @@ func (r Registry) Register(ctx context.Context, instanceID, serviceName, hostPor
 	key := "/" + serviceName + "/" + instanceID + "/" + hostPort
 
 	// 创建3秒的租约
-	if lease, err := r.client.Grant(ctx, 3); err != nil {
-		return err
-	} else {
-		// 服务注册(向ETCD中写入一个key)
-		_, err := r.client.Put(ctx, key, "", etcdv3.WithLease(lease.ID))
+	lease, err := r.client.Grant(ctx, 3)
+	if err != nil {
 		return err
 	}
+	// 服务注册(向ETCD中写入一个key)
+	_, err = r.client.Put(ctx, key, "", etcdv3.WithLease(lease.ID))
+	return err
 }
 
+// Unregister unregisters a service instance from etcd.
 func (r Registry) Unregister(ctx context.Context, instanceID, serviceName string) error {
 	zap.L().Info("unregister service",
 		zap.String("serviceName", serviceName),
@@ -65,6 +68,7 @@ func (r Registry) Unregister(ctx context.Context, instanceID, serviceName string
 	return err
 }
 
+// Discover discovers service instances from etcd.
 func (r Registry) Discover(ctx context.Context, serviceName string) ([]string, error) {
 	resp, err := r.client.Get(ctx, "/"+serviceName+"/", etcdv3.WithPrefix())
 	if err != nil {
@@ -78,6 +82,7 @@ func (r Registry) Discover(ctx context.Context, serviceName string) ([]string, e
 	return addresses, nil
 }
 
+// HealthCheck checks the health of a service instance in etcd.
 func (r Registry) HealthCheck(instanceID, serviceName string) error {
 	ctx := context.Background()
 
@@ -113,22 +118,17 @@ func (r Registry) HealthCheck(instanceID, serviceName string) error {
 
 		// 处理续租响应
 		go func() {
-			for {
-				select {
-				case resp, ok := <-keepAliveChan:
-					if !ok {
-						zap.L().Warn("keep alive channel closed",
-							zap.String("serviceName", serviceName),
-							zap.String("instanceID", instanceID))
-						return
-					}
-					if true == false {
-						zap.L().Debug("keep alive success",
-							zap.String("serviceName", serviceName),
-							zap.String("instanceID", instanceID),
-							zap.Int64("ttl", resp.TTL))
-					}
+			for resp := range keepAliveChan {
+				if resp == nil {
+					zap.L().Warn("keep alive channel closed",
+						zap.String("serviceName", serviceName),
+						zap.String("instanceID", instanceID))
+					return
 				}
+				/*zap.L().Debug("keep alive success",
+				zap.String("serviceName", serviceName),
+				zap.String("instanceID", instanceID),
+				zap.Int64("ttl", resp.TTL))*/
 			}
 		}()
 	}

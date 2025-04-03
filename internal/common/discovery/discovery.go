@@ -14,6 +14,7 @@ type Registry interface {
 	HealthCheck(instanceID, serviceName string) error
 }
 
+// GenerateInstanceID generates a unique instance ID for a service.
 func GenerateInstanceID(serviceName string) string {
 	x := rand.New(rand.NewSource(time.Now().Unix()))
 	return fmt.Sprintf("%s-%d", serviceName, x.Uint64())

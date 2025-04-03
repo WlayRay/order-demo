@@ -9,7 +9,7 @@ import (
 	"net"
 )
 
-// RunGRPCServer 启动 gRPC 服务
+// RunGRPCServer starts a gRPC server.
 func RunGRPCServer(serviceName string, registerServer func(server *grpc.Server)) {
 	addr := viper.Sub(serviceName).GetString("grpc-addr")
 	if addr == "" {
@@ -23,7 +23,7 @@ func RunGRPCServer(serviceName string, registerServer func(server *grpc.Server))
 	RunGRPCServerOnAddr(addr, registerServer)
 }
 
-// RunGRPCServerOnAddr 在指定地址启动 gRPC 服务
+// RunGRPCServerOnAddr starts a gRPC server on a specified address.
 func RunGRPCServerOnAddr(addr string, registerServer func(server *grpc.Server)) {
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(

@@ -11,6 +11,7 @@ type QueryHandler[Q, R any] interface {
 	Handle(context.Context, Q) (R, error)
 }
 
+// ApplyQueryDecorators applies decorators to a query handler.
 func ApplyQueryDecorators[H, R any](handler QueryHandler[H, R], logger *zap.Logger, metricsClient MetricsClient) QueryHandler[H, R] {
 	return queryLoggingDecorator[H, R]{
 		logger: logger,

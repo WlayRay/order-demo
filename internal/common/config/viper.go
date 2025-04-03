@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// NewViperConfig initializes the Viper configuration.
 func NewViperConfig() error {
 	viper.SetConfigName("global")
 	viper.SetConfigType("yaml")

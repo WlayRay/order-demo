@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Connect establishes a connection to the RabbitMQ server and returns a channel.
 func Connect(user, password, host, port string) (*amqp.Channel, func() error) {
 	address := fmt.Sprintf("amqp://%s:%s@%s:%s/", user, password, host, port)
 	conn, err := amqp.Dial(address)

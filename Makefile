@@ -8,3 +8,11 @@ genproto:
 .PHONY: genopenapi
 genopenapi:
 	@./scripts/genopenapi.sh
+
+.PHONY: fmt
+fmt:
+	gofmt -w -s internal/
+
+.PHONY: lint
+lint:
+	@./scripts/lint.sh

@@ -31,7 +31,7 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	if err != nil {
 		zap.L().Fatal("Failed to bind a queue", zap.Error(err))
 	}
-	
+
 	msgs, consumeErr := ch.Consume(q.Name, "", false, false, false, false, nil)
 	if consumeErr != nil {
 		zap.L().Fatal("Failed to consume", zap.String("queue", q.Name), zap.Error(consumeErr))

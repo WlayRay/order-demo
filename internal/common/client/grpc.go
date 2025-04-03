@@ -22,10 +22,7 @@ func NewStockGRPCClient(ctx context.Context) (stockpb.StockServiceClient, func()
 		zap.L().Warn("stock service not found")
 	}
 
-	opts, err := grpcDialOpts(grpcAddr)
-	if err != nil {
-		return nil, nil, err
-	}
+	opts := grpcDialOpts(grpcAddr)
 	conn, newClientErr := grpc.NewClient(grpcAddr, opts...)
 	if newClientErr != nil {
 		return nil, nil, newClientErr
@@ -46,10 +43,7 @@ func NewOrderGRPCClient(ctx context.Context) (orderpb.OrderServiceClient, func()
 		zap.L().Warn("stock service not found")
 	}
 
-	opts, err := grpcDialOpts(grpcAddr)
-	if err != nil {
-		return nil, nil, err
-	}
+	opts := grpcDialOpts(grpcAddr)
 	conn, newClientErr := grpc.NewClient(grpcAddr, opts...)
 	if newClientErr != nil {
 		return nil, nil, newClientErr
@@ -59,8 +53,8 @@ func NewOrderGRPCClient(ctx context.Context) (orderpb.OrderServiceClient, func()
 	}, nil
 }
 
-func grpcDialOpts(addr string) ([]grpc.DialOption, error) {
+func grpcDialOpts(_ string) []grpc.DialOption {
 	return []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	}, nil
+	}
 }

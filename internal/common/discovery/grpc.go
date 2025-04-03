@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// RegisterToETCD registers a service to etcd.
 func RegisterToETCD(ctx context.Context, serviceName string) (func() error, error) {
 	registry, err := etcd.GetEtcdClient(viper.GetStringSlice("etcd.endpoints"))
 	if err != nil {
@@ -46,6 +47,7 @@ func RegisterToETCD(ctx context.Context, serviceName string) (func() error, erro
 	}, nil
 }
 
+// GetServiceAddr retrieves the address of a service from etcd.
 func GetServiceAddr(ctx context.Context, serviceName string) (string, error) {
 	registry, err := etcd.GetEtcdClient(viper.GetStringSlice("etcd.endpoints"))
 	if err != nil {
