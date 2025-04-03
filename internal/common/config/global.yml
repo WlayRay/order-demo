@@ -28,7 +28,8 @@ payment:
 rabbitmq:
   user: guest
   password: guest
-  host: 127.0.0.1
+  host: 0.0.0.0
   port: 5672
 
 stripe-key: "${STRIPE_KEY}"
+endpoint-stripe-secret: "${ENDPOINT_STRIPE_SECRET}"

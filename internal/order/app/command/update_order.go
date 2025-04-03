@@ -34,7 +34,7 @@ func NewUpdateOrderHandler(orderRepo domain.Repository, logger *zap.Logger, metr
 }
 
 func (c updateOrderHandler) Handle(ctx context.Context, cmd UpdateOrder) (any, error) {
-	if cmd.UpdateFn != nil {
+	if cmd.UpdateFn == nil {
 		zap.L().Warn("UpdateOrderHandler.Handle: UpdateFn is nil", zap.Any("order:", cmd.Order))
 		cmd.UpdateFn = func(_ context.Context, order *domain.Order) (*domain.Order, error) {
 			return order, nil

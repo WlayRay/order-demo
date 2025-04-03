@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/order/app"
 	"github.com/WlayRay/order-demo/order/app/command"
@@ -30,8 +31,9 @@ func (H HTTPServer) PostCustomerCustomerIDOrders(c *gin.Context, customerID stri
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message":     "success",
-		"customer_id": req.CustomerID,
-		"order_id":    r.OrderID,
+		"customerID":  req.CustomerID,
+		"orderID":     r.OrderID,
+		"redirectURL": fmt.Sprintf("http://localhost:9000/success?customerID=%s&orderID=%s", req.CustomerID, r.OrderID),
 	})
 }
 
@@ -49,6 +51,8 @@ func (H HTTPServer) GetCustomerCustomerIDOrdersOrderID(c *gin.Context, customerI
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
-		"data":    o,
+		"data": gin.H{
+			"Order": o,
+		},
 	})
 }

@@ -13,6 +13,7 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/spf13/viper v1.19.0
+	github.com/stripe/stripe-go/v80 v80.2.1
 	go.uber.org/zap v1.21.0
 	google.golang.org/grpc v1.67.3
 	google.golang.org/protobuf v1.36.1

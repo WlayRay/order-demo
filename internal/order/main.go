@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"github.com/WlayRay/order-demo/common/broker"
 	"github.com/WlayRay/order-demo/common/config"
 	"github.com/WlayRay/order-demo/common/discovery"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/common/logging"
 	"github.com/WlayRay/order-demo/common/server"
+	"github.com/WlayRay/order-demo/order/infrastructure/consumer"
 	"github.com/WlayRay/order-demo/order/ports"
 	"github.com/WlayRay/order-demo/order/service"
 	"github.com/gin-gonic/gin"
@@ -41,11 +43,24 @@ func main() {
 		}
 	}()
 
+	ch, closeCh := broker.Connect(
+		viper.GetString("rabbitmq.user"),
+		viper.GetString("rabbitmq.password"),
+		viper.GetString("rabbitmq.host"),
+		viper.GetString("rabbitmq.port"),
+	)
+	defer func() {
+		_ = ch.Close()
+		_ = closeCh()
+	}()
+	go consumer.NewConsumer(application).Listen(ch)
+
 	go server.RunGRPCServer(serviceName, func(server *grpc.Server) {
 		orderpb.RegisterOrderServiceServer(server, ports.NewGRPCServer(application))
 	})
 
 	server.RunHTTPServer(serviceName, func(router *gin.Engine) {
+		router.StaticFile("/success", "..\\..\\public\\success.html")
 		ports.RegisterHandlersWithOptions(router, HTTPServer{
 			app: application,
 		}, ports.GinServerOptions{

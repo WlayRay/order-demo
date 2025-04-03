@@ -59,8 +59,9 @@ func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*Creat
 	}
 
 	o, createErr := c.orderRepo.Create(ctx, &domain.Order{
-		CustomerID: cmd.CustomerID,
-		Items:      validItems,
+		CustomerID:  cmd.CustomerID,
+		Items:       validItems,
+		PaymentLink: "price_1R7HVgPNegMNE0WfuwRkVr6b",
 	})
 	if createErr != nil {
 		return nil, createErr
