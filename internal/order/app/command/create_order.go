@@ -4,12 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/WlayRay/order-demo/common/broker"
 	"github.com/WlayRay/order-demo/common/decorator"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/order/app/query"
 	domain "github.com/WlayRay/order-demo/order/domain/order"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 )
 
@@ -53,23 +55,26 @@ func NewCreateOrderHandler(orderRepo domain.Repository, stockGRPC query.StockSer
 }
 
 func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*CreateOrderResult, error) {
+	q, queueErr := c.chanel.QueueDeclare(broker.EventOrderCreated, false, true, false, false, nil)
+	if queueErr != nil {
+		return nil, queueErr
+	}
+
+	t := otel.Tracer("rabbitmq")
+	ctx, span := t.Start(ctx, fmt.Sprintf("rabbitmq.%s.publish", q.Name))
+	defer span.End()
+
 	validItems, err := c.validate(ctx, cmd.Items)
 	if err != nil {
 		return nil, err
 	}
 
 	o, createErr := c.orderRepo.Create(ctx, &domain.Order{
-		CustomerID:  cmd.CustomerID,
-		Items:       validItems,
-		PaymentLink: "price_1R7HVgPNegMNE0WfuwRkVr6b",
+		CustomerID: cmd.CustomerID,
+		Items:      validItems,
 	})
 	if createErr != nil {
 		return nil, createErr
-	}
-
-	q, queueErr := c.chanel.QueueDeclare(broker.EventOrderCreated, false, true, false, false, nil)
-	if queueErr != nil {
-		return nil, queueErr
 	}
 
 	marshalOrder, jsonErr := json.Marshal(o)
@@ -77,10 +82,12 @@ func (c createOrderHandler) Handle(ctx context.Context, cmd CreateOrder) (*Creat
 		return nil, jsonErr
 	}
 
+	header := broker.InjectRabbitMQHeaders(ctx)
 	err = c.chanel.PublishWithContext(ctx, "", q.Name, false, false, amqp.Publishing{
 		ContentType:  "application/json",
 		DeliveryMode: amqp.Persistent,
 		Body:         marshalOrder,
+		Headers:      header,
 	})
 	if err != nil {
 		return nil, err
@@ -94,7 +101,7 @@ func (c createOrderHandler) validate(ctx context.Context, items []*orderpb.ItemW
 		return nil, errors.New("must have at least one item")
 	}
 	items = packItems(items)
-	resp, err := c.stockGRPC.CheckItemsInStock(items, ctx)
+	resp, err := c.stockGRPC.CheckItemsInStock(ctx, items)
 	if err != nil {
 		return nil, err
 	}

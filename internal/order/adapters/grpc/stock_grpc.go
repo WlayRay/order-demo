@@ -16,9 +16,9 @@ func NewStockGRPC(client stockpb.StockServiceClient) *StockGRPC {
 
 }
 
-func (s StockGRPC) CheckItemsInStock(items []*orderpb.ItemWithQuantity, ctx context.Context) (*stockpb.CheckIfItemsInStockResponse, error) {
+func (s StockGRPC) CheckItemsInStock(ctx context.Context, items []*orderpb.ItemWithQuantity) (*stockpb.CheckIfItemsInStockResponse, error) {
 	resp, err := s.client.CheckIfItemsInStock(ctx, &stockpb.CheckIfItemsInStockRequest{Items: items})
-	zap.L().Info("stock grpc response:", zap.Any("resp", resp))
+	zap.L().Info("stock grpc response", zap.Any("resp", resp))
 	return resp, err
 }
 

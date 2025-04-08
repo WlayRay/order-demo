@@ -8,18 +8,18 @@ import (
 	"go.uber.org/zap"
 )
 
-type CreatePaymentLink struct {
+type CreatePayment struct {
 	Order *orderpb.Order
 }
 
-type CreatePaymentHandler decorator.CommandHandler[CreatePaymentLink, string]
+type CreatePaymentHandler decorator.CommandHandler[CreatePayment, string]
 
 type createPaymentHandler struct {
 	processor domain.Processor
 	orderGRPC OrderService
 }
 
-func (c createPaymentHandler) Handle(ctx context.Context, cmd CreatePaymentLink) (string, error) {
+func (c createPaymentHandler) Handle(ctx context.Context, cmd CreatePayment) (string, error) {
 	link, err := c.processor.CreatePaymentLink(ctx, cmd.Order)
 	if err != nil {
 		return "", err
@@ -45,7 +45,7 @@ func NewCreatePaymentHandler(processor domain.Processor, orderGRPC OrderService,
 		panic("processor is nil")
 	}
 
-	return decorator.ApplyCommandDecorators[CreatePaymentLink, string](
+	return decorator.ApplyCommandDecorators[CreatePayment, string](
 		createPaymentHandler{
 			processor: processor,
 			orderGRPC: orderGRPC,

@@ -6,6 +6,7 @@ import (
 	"github.com/WlayRay/order-demo/common/config"
 	"github.com/WlayRay/order-demo/common/logging"
 	"github.com/WlayRay/order-demo/common/server"
+	"github.com/WlayRay/order-demo/common/tracing"
 	"github.com/WlayRay/order-demo/payment/infrastructure/consumer"
 	"github.com/WlayRay/order-demo/payment/service"
 	"github.com/spf13/viper"
@@ -25,6 +26,14 @@ func main() {
 
 	serviceName := viper.GetString("payment.service-name")
 	serverType := viper.GetString("payment.server-to-run")
+
+	shutdown, err := tracing.InitJaegerProvider(viper.GetString("jaeger.url"), serviceName)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer func() {
+		_ = shutdown(ctx)
+	}()
 
 	application, cleanup := service.NewApplication(ctx)
 	defer cleanup()

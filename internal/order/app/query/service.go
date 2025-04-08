@@ -7,6 +7,6 @@ import (
 )
 
 type StockService interface {
-	CheckItemsInStock(items []*orderpb.ItemWithQuantity, ctx context.Context) (*stockpb.CheckIfItemsInStockResponse, error)
+	CheckItemsInStock(ctx context.Context, items []*orderpb.ItemWithQuantity) (*stockpb.CheckIfItemsInStockResponse, error)
 	GetItems(ctx context.Context, itemsIDs []string) ([]*orderpb.Item, error)
 }

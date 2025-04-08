@@ -3,11 +3,13 @@ package consumer
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/WlayRay/order-demo/common/broker"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/payment/app"
 	"github.com/WlayRay/order-demo/payment/app/command"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 )
 
@@ -35,14 +37,19 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	forever := make(chan struct{})
 	go func() {
 		for msg := range msgs {
-			c.handleMessage(msg, q, ch)
+			c.handleMessage(msg, q)
 		}
 	}()
 	<-forever
 }
 
-func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue, ch *amqp.Channel) {
+func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue) {
 	zap.L().Info("Received a new message", zap.String("queue", q.Name), zap.String("body", string(msg.Body)))
+
+	ctx := broker.ExtractRabbitMQHeaders(context.Background(), msg.Headers)
+	tr := otel.Tracer("rabbitmq")
+	_, span := tr.Start(ctx, fmt.Sprintf("rabbitmq.%s.consume", q.Name))
+	defer span.End()
 
 	o := &orderpb.Order{}
 	if err := json.Unmarshal(msg.Body, o); err != nil {
@@ -51,13 +58,14 @@ func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue, ch *amqp.Chann
 		return
 	}
 
-	if _, err := c.app.Commands.CreatePaymentLink.Handle(context.TODO(), command.CreatePaymentLink{Order: o}); err != nil {
+	if _, err := c.app.Commands.CreatePayment.Handle(ctx, command.CreatePayment{Order: o}); err != nil {
 		//TODO: retry
 		zap.L().Warn("Failed to handle message", zap.Error(err))
 		_ = msg.Nack(false, false)
 		return
 	}
 
+	span.AddEvent("payment.created")
 	_ = msg.Ack(false)
 	zap.L().Info("consumed successfully")
 }

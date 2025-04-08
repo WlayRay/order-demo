@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/WlayRay/order-demo/common/broker"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/payment/domain"
@@ -11,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stripe/stripe-go/v80"
 	"github.com/stripe/stripe-go/v80/webhook"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
@@ -82,7 +84,12 @@ func (h *PaymentHandler) handleWebhook(c *gin.Context) {
 				return
 			}
 
-			err = h.channel.PublishWithContext(ctx,
+			tr := otel.Tracer("rabbitmq")
+			mqCtx, span := tr.Start(ctx, fmt.Sprintf("rabbitmq.%s.publish", broker.EventOrderPaid))
+			defer span.End()
+
+			header := broker.InjectRabbitMQHeaders(mqCtx)
+			err = h.channel.PublishWithContext(mqCtx,
 				broker.EventOrderPaid,
 				broker.EventOrderPaid,
 				false,
@@ -91,6 +98,7 @@ func (h *PaymentHandler) handleWebhook(c *gin.Context) {
 					ContentType:  "application/json",
 					DeliveryMode: amqp.Persistent,
 					Body:         marshalledOrder,
+					Headers:      header,
 				})
 			if err != nil {
 				zap.L().Error("Failed to publish message", zap.Error(err))

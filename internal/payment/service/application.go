@@ -38,7 +38,7 @@ func newApplication(_ context.Context, orderGRPC command.OrderService, processor
 	metricClient := metrics.TodoMetrics{}
 	return app.Application{
 		Commands: app.Commands{
-			CreatePaymentLink: command.NewCreatePaymentHandler(processor, orderGRPC, logger, metricClient),
+			CreatePayment: command.NewCreatePaymentHandler(processor, orderGRPC, logger, metricClient),
 		},
 	}
 

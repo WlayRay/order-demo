@@ -8,6 +8,7 @@ import (
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/common/logging"
 	"github.com/WlayRay/order-demo/common/server"
+	"github.com/WlayRay/order-demo/common/tracing"
 	"github.com/WlayRay/order-demo/order/infrastructure/consumer"
 	"github.com/WlayRay/order-demo/order/ports"
 	"github.com/WlayRay/order-demo/order/service"
@@ -29,6 +30,14 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	shutdown, err := tracing.InitJaegerProvider(viper.GetString("jaeger.url"), serviceName)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer func() {
+		_ = shutdown(ctx)
+	}()
 
 	application, cleanup := service.NewApplication(ctx)
 	defer cleanup()

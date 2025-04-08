@@ -7,5 +7,5 @@ type Application struct {
 }
 
 type Commands struct {
-	CreatePaymentLink command.CreatePaymentHandler
+	CreatePayment command.CreatePaymentHandler
 }

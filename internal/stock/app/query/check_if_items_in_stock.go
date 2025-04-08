@@ -26,6 +26,7 @@ func (c checkIfItemInStockHandler) Handle(ctx context.Context, query CheckIfItem
 			&orderpb.Item{
 				ID:       query.Items[i].ID,
 				Quantity: query.Items[i].Quantity,
+				PriceID:  "price_1R7HVgPNegMNE0WfuwRkVr6b",
 			})
 
 	}

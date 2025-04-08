@@ -4,6 +4,7 @@ import (
 	grpcZap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpcTags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/spf13/viper"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
@@ -26,6 +27,7 @@ func RunGRPCServer(serviceName string, registerServer func(server *grpc.Server))
 // RunGRPCServerOnAddr starts a gRPC server on a specified address.
 func RunGRPCServerOnAddr(addr string, registerServer func(server *grpc.Server)) {
 	grpcServer := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainUnaryInterceptor(
 			grpcTags.UnaryServerInterceptor(grpcTags.WithFieldExtractor(grpcTags.CodeGenRequestFieldExtractor)),
 			grpcZap.UnaryServerInterceptor(zap.L(), grpcZap.WithMessageProducer(grpcZap.DefaultMessageProducer)),

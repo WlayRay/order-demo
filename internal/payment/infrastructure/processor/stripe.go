@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
+	"github.com/WlayRay/order-demo/common/tracing"
 	"github.com/stripe/stripe-go/v80"
 	"github.com/stripe/stripe-go/v80/checkout/session"
 )
@@ -27,6 +28,9 @@ const (
 )
 
 func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.Order) (string, error) {
+	_, span := tracing.Start(ctx, "stripeProcessor.CreatePaymentLink")
+	defer span.End()
+
 	var items []*stripe.CheckoutSessionLineItemParams
 	for i := range len(order.Items) {
 		items = append(items, &stripe.CheckoutSessionLineItemParams{
