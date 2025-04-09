@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/WlayRay/order-demo/common/genproto/orderpb"
+	client "github.com/WlayRay/order-demo/common/client/order"
 	"github.com/WlayRay/order-demo/common/tracing"
 	"github.com/WlayRay/order-demo/order/app"
 	"github.com/WlayRay/order-demo/order/app/command"
@@ -19,7 +19,7 @@ func (H HTTPServer) PostCustomerCustomerIDOrders(c *gin.Context, customerID stri
 	ctx, span := tracing.Start(c, "PostCustomerCustomerIDOrders")
 	defer span.End()
 
-	var req orderpb.CreateOrderRequest
+	var req client.CreateOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

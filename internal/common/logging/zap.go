@@ -8,14 +8,24 @@ import (
 
 func Init() {
 	var config zap.Config
-	//if viper.GetBool("development") {
 	config = zap.NewDevelopmentConfig()
-	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	//} else {
-	//	config.Encoding = "json"
-	//	config = zap.NewProductionConfig()
-	//	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	//}
+	config.Encoding = "json"
+
+	// 自定义 EncoderConfig 以优化字段名称和格式
+	config.EncoderConfig = zapcore.EncoderConfig{
+		TimeKey:        "time",          // 时间字段名称
+		LevelKey:       "level",         // 日志级别字段名称
+		NameKey:        "logger",        // 日志器名称字段名称（可选）
+		CallerKey:      "caller",        // 调用栈字段名称
+		FunctionKey:    zapcore.OmitKey, // 省略函数名字段
+		MessageKey:     "message",       // 日志消息字段名称
+		StacktraceKey:  "stacktrace",    // 堆栈信息字段名称
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.CapitalLevelEncoder, // 日志级别编码为大写
+		EncodeTime:     zapcore.RFC3339TimeEncoder,  // 时间格式化为 RFC3339 标准
+		EncodeDuration: zapcore.StringDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder, // 调用栈路径简化
+	}
 
 	zapLevel := viper.GetString("zap-level")
 	switch zapLevel {
@@ -32,12 +42,6 @@ func Init() {
 	default:
 		config.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	}
-
-	//// 配置输出到文件
-	//if logFile := viper.GetString("log-file"); logFile != "" {
-	//	config.OutputPaths = append(config.OutputPaths, logFile)
-	//	config.ErrorOutputPaths = append(config.ErrorOutputPaths, logFile)
-	//}
 
 	logger, err := config.Build(
 		zap.AddCaller(),
