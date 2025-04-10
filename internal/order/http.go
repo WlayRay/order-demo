@@ -7,6 +7,7 @@ import (
 	"github.com/WlayRay/order-demo/order/app"
 	"github.com/WlayRay/order-demo/order/app/command"
 	"github.com/WlayRay/order-demo/order/app/query"
+	"github.com/WlayRay/order-demo/order/convertor"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -27,7 +28,7 @@ func (H HTTPServer) PostCustomerCustomerIDOrders(c *gin.Context, customerID stri
 
 	r, err := H.app.Commands.CreateOrder.Handle(ctx, command.CreateOrder{
 		CustomerID: req.CustomerID,
-		Items:      req.Items,
+		Items:      convertor.GetItemWithQuantityConvertor().ClientsToEntities(req.Items),
 	})
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})

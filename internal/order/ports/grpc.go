@@ -6,6 +6,7 @@ import (
 	"github.com/WlayRay/order-demo/order/app" // 注意这里是order
 	"github.com/WlayRay/order-demo/order/app/command"
 	"github.com/WlayRay/order-demo/order/app/query"
+	"github.com/WlayRay/order-demo/order/convertor"
 	domain "github.com/WlayRay/order-demo/order/domain/order"
 	"github.com/golang/protobuf/ptypes/empty"
 	"go.uber.org/zap"
@@ -25,7 +26,7 @@ func NewGRPCServer(app app.Application) *GRPCServer {
 func (G GRPCServer) CreateOrder(ctx context.Context, request *orderpb.CreateOrderRequest) (*emptypb.Empty, error) {
 	_, err := G.app.Commands.CreateOrder.Handle(ctx, command.CreateOrder{
 		CustomerID: request.CustomerID,
-		Items:      request.Items,
+		Items:      convertor.GetItemWithQuantityConvertor().ProtoToEntities(request.Items),
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -41,12 +42,16 @@ func (G GRPCServer) GetOrder(ctx context.Context, request *orderpb.GetOrderReque
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	return o.ToProto(), err
+	return convertor.GetOrderConvertor().EntityToProto(o), err
 }
 
 func (G GRPCServer) UpdateOrder(ctx context.Context, request *orderpb.Order) (_ *emptypb.Empty, err error) {
 	zap.L().Info("UpdateOrder", zap.Any("request", request))
-	order, newOrderErr := domain.NewOrder(request.ID, request.CustomerID, request.Status, request.PaymentLink, request.Items)
+	order, newOrderErr := domain.NewOrder(request.ID,
+		request.CustomerID,
+		request.Status,
+		request.PaymentLink,
+		convertor.GetItemConvertor().ProtoToEntities(request.Items))
 	if newOrderErr != nil {
 		return nil, status.Error(codes.Internal, newOrderErr.Error())
 	}
