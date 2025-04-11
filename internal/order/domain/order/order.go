@@ -8,11 +8,11 @@ import (
 )
 
 type Order struct {
-	ID          string
-	CustomerID  string
-	Status      string
-	PaymentLink string
-	Items       []*entity.Item
+	ID          string         `json:"ID"`
+	CustomerID  string         `json:"customerID"`
+	Status      string         `json:"status"`
+	PaymentLink string         `json:"paymentLink"`
+	Items       []*entity.Item `json:"items"`
 }
 
 func NewOrder(id, customerID, status, paymentLink string, items []*entity.Item) (*Order, error) {
