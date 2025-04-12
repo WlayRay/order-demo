@@ -36,5 +36,13 @@ rabbitmq:
   port: 5672
   max-retry-count: 3
 
+postgres:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: 123456
+  dbname: order_demo
+  search-path: order
+
 stripe-key: "${STRIPE_KEY}"
 endpoint-stripe-secret: "${ENDPOINT_STRIPE_SECRET}"

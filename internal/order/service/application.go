@@ -39,7 +39,9 @@ func NewApplication(ctx context.Context) (app.Application, func()) {
 }
 
 func newApplication(_ context.Context, stockGRPC query.StockService, ch *amqp.Channel) app.Application {
-	orderRepo := adapters.NewMemoryOrderRepository()
+	//orderRepo := adapters.NewMemoryOrderRepository()
+	orderRepo := adapters.NewOrderRepositoryPG(adapters.NewEntClient())
+
 	logger := zap.L()
 	metricClient := metrics.TodoMetrics{}
 	return app.Application{

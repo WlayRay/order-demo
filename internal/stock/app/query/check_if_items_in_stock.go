@@ -19,6 +19,12 @@ type checkIfItemInStockHandler struct {
 }
 
 func (c checkIfItemInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*orderpb.Item, error) {
+	var priceIds = [3]string{
+		"price_1R7HVgPNegMNE0WfuwRkVr6b",
+		"price_1RD4V5PNegMNE0WfaN9nu9vo",
+		"price_1RD4XoPNegMNE0Wf9is4F4Wg",
+	}
+
 	var res []*orderpb.Item
 	for i := 0; i < len(query.Items); i++ {
 		res = append(
@@ -26,7 +32,7 @@ func (c checkIfItemInStockHandler) Handle(ctx context.Context, query CheckIfItem
 			&orderpb.Item{
 				ID:       query.Items[i].ID,
 				Quantity: query.Items[i].Quantity,
-				PriceID:  "price_1R7HVgPNegMNE0WfuwRkVr6b",
+				PriceID:  priceIds[i],
 			})
 
 	}

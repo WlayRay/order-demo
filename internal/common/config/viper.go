@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
@@ -34,7 +33,7 @@ func newViperConfig() error {
 	viper.SetConfigName("global")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(relPath)
-	viper.SetEnvKeyReplacer(strings.NewReplacer("_", "-"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
 	_ = viper.BindEnv("stripe-key", "STRIPE_KEY")
 	_ = viper.BindEnv("endpoint-stripe-secret", "ENDPOINT_STRIPE_SECRET")
@@ -49,6 +48,6 @@ func getRelativePathFromCaller() (string, error) {
 
 	_, here, _, _ := runtime.Caller(0)
 	relPath, err := filepath.Rel(callerPwd, filepath.Dir(here))
-	fmt.Printf("callerPwd: %s, viper config relative path: %s\n", callerPwd, relPath)
+	//fmt.Printf("callerPwd: %s, viper config relative path: %s\n", callerPwd, relPath)
 	return relPath, err
 }
