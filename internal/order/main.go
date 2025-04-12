@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/WlayRay/order-demo/common/broker"
-	"github.com/WlayRay/order-demo/common/config"
+	_ "github.com/WlayRay/order-demo/common/config"
 	"github.com/WlayRay/order-demo/common/discovery"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/common/logging"
@@ -20,9 +20,6 @@ import (
 
 func init() {
 	logging.Init()
-	if err := config.NewViperConfig(); err != nil {
-		zap.L().Fatal("init config error", zap.Error(err))
-	}
 }
 
 func main() {

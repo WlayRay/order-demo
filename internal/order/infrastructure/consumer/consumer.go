@@ -42,13 +42,13 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	forever := make(chan struct{})
 	go func() {
 		for msg := range msgs {
-			c.handleMessage(msg, q)
+			c.handleMessage(ch, msg, q)
 		}
 	}()
 	<-forever
 }
 
-func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue) {
+func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Queue) {
 	ctx := broker.ExtractRabbitMQHeaders(context.Background(), msg.Headers)
 	t := otel.Tracer("rabbitmq")
 	_, span := t.Start(ctx, fmt.Sprintf("rabbitmq.%s.consume", q.Name))
@@ -72,8 +72,9 @@ func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue) {
 	})
 	if err != nil {
 		zap.L().Warn("Failed to update order", zap.Error(err), zap.String("orderID", o.ID))
-		// TODO: retry
-		_ = msg.Nack(false, false)
+		if err := broker.HandleRetry(ctx, ch, &msg); err != nil {
+			zap.L().Warn("Message retry error", zap.Error(err), zap.Any("messageID", msg.MessageId))
+		}
 		return
 	}
 

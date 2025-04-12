@@ -45,7 +45,7 @@ func Init() {
 
 	logger, err := config.Build(
 		zap.AddCaller(),
-		zap.AddCallerSkip(1),
+		zap.AddCallerSkip(0),
 		zap.AddStacktrace(zapcore.WarnLevel),
 	)
 	if err != nil {

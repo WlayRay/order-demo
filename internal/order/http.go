@@ -48,7 +48,7 @@ func (H HTTPServer) GetCustomerCustomerIDOrdersOrderID(c *gin.Context, customerI
 	var (
 		err  error
 		resp struct {
-			Order *domain.Order
+			Order *domain.Order `json:"order"`
 		}
 	)
 

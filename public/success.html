@@ -106,20 +106,18 @@
                 const data = await response.json();
                 console.log("data = ", data);
 
-                if (data.data.Order.Status === 'waiting_for_payment') {
+                if (data.data.order.status === 'waiting_for_payment') {
                     order.Status = '等待支付中...';
                     document.getElementById('orderStatus').innerText = order.Status;
                     document.querySelector('.after-payment-popup').style.display = 'block';
-                    document.getElementById('payment-link').href = data.data.Order.PaymentLink;
-
-                    // 隐藏背景多余文字
+                    document.getElementById('payment-link').href = data.data.order.paymentLink;
                     document.getElementById('order-message').classList.add('hidden');
                     document.getElementById('order-status').classList.add('hidden');
-                } else if (data.data.Order.Status === 'paid') {
+                } else if (data.data.order.status === 'paid') {
                     order.Status = '支付成功，请稍等...';
                     document.getElementById('orderStatus').innerText = order.Status;
                     setTimeout(getOrder, 5000);
-                } else if (data.data.Order.Status === 'ready') {
+                } else if (data.data.order.status === 'ready') {
                     order.Status = '已完成';
                     document.querySelector('.after-payment-popup').style.display = 'none';
                     document.querySelector('.ready-popup').style.display = 'block';

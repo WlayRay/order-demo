@@ -37,13 +37,13 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	forever := make(chan struct{})
 	go func() {
 		for msg := range msgs {
-			c.handleMessage(msg, q)
+			c.handleMessage(ch, msg, q)
 		}
 	}()
 	<-forever
 }
 
-func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue) {
+func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Queue) {
 	zap.L().Info("Received a new message", zap.String("queue", q.Name), zap.String("body", string(msg.Body)))
 
 	ctx := broker.ExtractRabbitMQHeaders(context.Background(), msg.Headers)
@@ -59,8 +59,10 @@ func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue) {
 	}
 
 	if _, err := c.app.Commands.CreatePayment.Handle(ctx, command.CreatePayment{Order: o}); err != nil {
-		//TODO: retry
 		zap.L().Warn("Failed to handle message", zap.Error(err))
+		if err = broker.HandleRetry(ctx, ch, &msg); err != nil {
+			zap.L().Warn("Message retry error", zap.Error(err), zap.Any("messageID", msg.MessageId))
+		}
 		_ = msg.Nack(false, false)
 		return
 	}

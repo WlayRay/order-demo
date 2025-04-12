@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/WlayRay/order-demo/common/broker"
 	grpcClient "github.com/WlayRay/order-demo/common/client"
-	"github.com/WlayRay/order-demo/common/config"
+	_ "github.com/WlayRay/order-demo/common/config"
 	"github.com/WlayRay/order-demo/common/metrics"
 	"github.com/WlayRay/order-demo/order/adapters"
 	"github.com/WlayRay/order-demo/order/adapters/grpc"
@@ -15,12 +15,6 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
-
-func init() {
-	if err := config.NewViperConfig(); err != nil {
-		zap.L().Fatal("init config error", zap.Error(err))
-	}
-}
 
 func NewApplication(ctx context.Context) (app.Application, func()) {
 	stockClient, closeFn, err := grpcClient.NewStockGRPCClient(ctx)
