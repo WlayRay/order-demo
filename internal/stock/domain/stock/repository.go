@@ -3,12 +3,12 @@ package stock
 import (
 	"context"
 	"fmt"
-	"github.com/WlayRay/order-demo/common/genproto/orderpb"
+	"github.com/WlayRay/order-demo/stock/entity"
 	"strings"
 )
 
 type Repository interface {
-	GetItems(ctx context.Context, ids []string) ([]*orderpb.Item, error)
+	GetItems(ctx context.Context, ids []string) ([]*entity.Item, error)
 }
 
 type NotFoundError struct {

@@ -2,10 +2,12 @@ package ports
 
 import (
 	"context"
+	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/common/genproto/stockpb"
 	"github.com/WlayRay/order-demo/common/tracing"
 	"github.com/WlayRay/order-demo/stock/app" // 注意这里是stock
 	"github.com/WlayRay/order-demo/stock/app/query"
+	"github.com/WlayRay/order-demo/stock/entity"
 )
 
 type GRPCServer struct {
@@ -19,21 +21,59 @@ func NewGRPCServer(app app.Application) *GRPCServer {
 func (G GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsRequest) (*stockpb.GetItemsResponse, error) {
 	_, span := tracing.Start(ctx, "GetItems")
 	defer span.End()
-	
-	items, err := G.app.Queries.GetItems.Handle(ctx, query.GetItems{ItemIDs: request.ItemsIDs})
+
+	// TODO: 统一到convertor做转换
+	entityItemsIDs := make([]string, 0, len(request.ItemsIDs))
+	for _, id := range request.ItemsIDs {
+		entityItemsIDs = append(entityItemsIDs, id)
+	}
+
+	items, err := G.app.Queries.GetItems.Handle(ctx, query.GetItems{ItemIDs: entityItemsIDs})
 	if err != nil {
 		return nil, err
 	}
-	return &stockpb.GetItemsResponse{Items: items}, nil
+
+	// TODO: 统一到convertor做转换
+	orderpbItems := make([]*orderpb.Item, 0, len(items))
+	for _, item := range items {
+		orderpbItems = append(orderpbItems, &orderpb.Item{
+			ID:       item.ID,
+			Name:     item.Name,
+			PriceID:  item.PriceID,
+			Quantity: item.Quantity,
+		})
+	}
+
+	return &stockpb.GetItemsResponse{Items: orderpbItems}, nil
 }
 
 func (G GRPCServer) CheckIfItemsInStock(ctx context.Context, request *stockpb.CheckIfItemsInStockRequest) (*stockpb.CheckIfItemsInStockResponse, error) {
 	_, span := tracing.Start(ctx, "CheckIfItemsInStock")
 	defer span.End()
 
-	items, err := G.app.Queries.CheckIfItemsInStock.Handle(ctx, query.CheckIfItemsInStock{Items: request.Items})
+	// TODO: 统一到convertor做转换
+	entityItems := make([]*entity.ItemWithQuantity, 0, len(request.Items))
+	for _, item := range request.Items {
+		entityItems = append(entityItems, &entity.ItemWithQuantity{
+			ID:       item.ID,
+			Quantity: item.Quantity,
+		})
+	}
+
+	items, err := G.app.Queries.CheckIfItemsInStock.Handle(ctx, query.CheckIfItemsInStock{Items: entityItems})
 	if err != nil {
 		return nil, err
 	}
-	return &stockpb.CheckIfItemsInStockResponse{InStock: 1, Items: items}, nil
+
+	// TODO: 统一到convertor做转换
+	orderpbItems := make([]*orderpb.Item, 0, len(items))
+	for _, item := range items {
+		orderpbItems = append(orderpbItems, &orderpb.Item{
+			ID:       item.ID,
+			Name:     item.Name,
+			PriceID:  item.PriceID,
+			Quantity: item.Quantity,
+		})
+	}
+	return &stockpb.CheckIfItemsInStockResponse{InStock: 1, Items: orderpbItems}, nil
 }

@@ -10,8 +10,7 @@ func Init() {
 	var config zap.Config
 	config = zap.NewDevelopmentConfig()
 	config.Encoding = "json"
-
-	// 自定义 EncoderConfig 以优化字段名称和格式
+	
 	config.EncoderConfig = zapcore.EncoderConfig{
 		TimeKey:        "time",          // 时间字段名称
 		LevelKey:       "level",         // 日志级别字段名称

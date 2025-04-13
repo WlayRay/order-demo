@@ -2,18 +2,19 @@ package adapters
 
 import (
 	"context"
-	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	domain "github.com/WlayRay/order-demo/stock/domain/stock"
+	"github.com/WlayRay/order-demo/stock/entity"
+
 	//"go.uber.org/zap"
 	"sync"
 )
 
 type MemoryStockRepository struct {
 	lock  *sync.RWMutex
-	store map[string]*orderpb.Item
+	store map[string]*entity.Item
 }
 
-var stub = map[string]*orderpb.Item{
+var stub = map[string]*entity.Item{
 	"item1": {
 		ID:       "123456",
 		Name:     "袜子",
@@ -41,12 +42,12 @@ func NewMemoryStockRepository() *MemoryStockRepository {
 	}
 }
 
-func (m MemoryStockRepository) GetItems(ctx context.Context, ids []string) ([]*orderpb.Item, error) {
+func (m MemoryStockRepository) GetItems(ctx context.Context, ids []string) ([]*entity.Item, error) {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 
 	var (
-		res     []*orderpb.Item
+		res     []*entity.Item
 		missing []string
 	)
 	for i := 0; i < len(ids); i++ {
