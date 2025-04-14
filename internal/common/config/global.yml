@@ -29,6 +29,9 @@ payment:
   http-addr: 0.0.0.0:9002
   grpc-addr: 0.0.0.0:12308
 
+goods:
+  service-name: goods
+
 rabbitmq:
   user: guest
   password: guest

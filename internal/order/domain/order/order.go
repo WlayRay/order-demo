@@ -8,7 +8,7 @@ import (
 )
 
 type Order struct {
-	ID          string         `json:"ID"`
+	ID          string         `json:"id"`
 	CustomerID  string         `json:"customerID"`
 	Status      string         `json:"status"`
 	PaymentLink string         `json:"paymentLink"`

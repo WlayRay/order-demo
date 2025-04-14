@@ -29,8 +29,7 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 		zap.L().Fatal("Failed to declare a queue", zap.Error(err))
 	}
 
-	err = ch.QueueBind(q.Name, "", broker.EventOrderPaid, false, nil)
-	if err != nil {
+	if err = ch.QueueBind(q.Name, "", broker.EventOrderPaid, false, nil); err != nil {
 		zap.L().Fatal("Failed to bind a queue", zap.Error(err))
 	}
 

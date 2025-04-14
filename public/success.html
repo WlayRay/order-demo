@@ -84,8 +84,8 @@
         </div>
 
         <div class="after-payment-popup">
-            <p>等待支付中...</p>
-            <p>您已成功下单!</p>
+            <p style="text-align: center;">等待支付中...</p>
+            <p style="text-align: center;">您已成功下单!</p>
             <a href="#" id="payment-link">去支付</a>
         </div>
     </section>
@@ -116,15 +116,16 @@
                 } else if (data.data.order.status === 'paid') {
                     order.Status = '支付成功，请稍等...';
                     document.getElementById('orderStatus').innerText = order.Status;
+                    document.querySelector('.after-payment-popup').style.display = 'none';
+                    document.getElementById('order-message').classList.remove('hidden');
+                    document.getElementById('order-status').classList.remove('hidden');
                     setTimeout(getOrder, 5000);
                 } else if (data.data.order.status === 'ready') {
                     order.Status = '已完成';
                     document.querySelector('.after-payment-popup').style.display = 'none';
                     document.querySelector('.ready-popup').style.display = 'block';
-                    document.getElementById('orderID').innerText = orderID;
+                    document.getElementById('orderId').innerText = orderID;
                     document.getElementById('orderStatus').innerText = order.Status;
-
-                    // 恢复背景文字
                     document.getElementById('order-message').classList.remove('hidden');
                     document.getElementById('order-status').classList.remove('hidden');
                 } else {
