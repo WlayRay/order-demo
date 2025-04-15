@@ -8,7 +8,6 @@ import (
 	etcdv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 	"strings"
-	"sync"
 )
 
 type Registry struct {
@@ -122,9 +121,3 @@ func (r Registry) HealthCheck(instanceID, serviceName string) error {
 
 	return nil
 }
-
-var (
-	etcdClient *Registry
-	once       sync.Once
-	err        error
-)
