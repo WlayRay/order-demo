@@ -44,10 +44,14 @@ func NewCheckIfItemsInStockHandler(stockRepo domain.Repository,
 //}
 
 func (c checkIfItemInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*entity.Item, error) {
+	if err := c.checkStock(ctx, query.Items); err != nil {
+		return nil, err
+	}
+
 	var res []*entity.Item
 	for i := range len(query.Items) {
 		priceID, err := c.stripeAPI.GetPriceByProductID(ctx, query.Items[i].ID)
-		if err != nil {
+		if err != nil || priceID == "" {
 			zap.L().Warn("GetPriceByProductID", zap.String("productID", query.Items[i].ID), zap.Error(err))
 			return nil, err
 		}
@@ -56,7 +60,53 @@ func (c checkIfItemInStockHandler) Handle(ctx context.Context, query CheckIfItem
 			Quantity: query.Items[i].Quantity,
 			PriceID:  priceID,
 		})
-
 	}
+	// TODO: 扣减库存
 	return res, nil
+}
+
+func (c checkIfItemInStockHandler) checkStock(ctx context.Context, query []*entity.ItemWithQuantity) error {
+	ids := make([]string, 0, len(query))
+	for _, item := range query {
+		ids = append(ids, item.ID)
+	}
+
+	records, err := c.stockRepo.GetStock(ctx, ids)
+	if err != nil {
+		return err
+	}
+
+	idQuantityMap := make(map[string]int32, len(records))
+	for _, record := range records {
+		idQuantityMap[record.ID] += record.Quantity
+	}
+
+	var (
+		ok        = true
+		failedIDs []struct {
+			ID   string
+			Want int32
+			Have int32
+		}
+	)
+
+	for _, item := range query {
+		if item.Quantity > idQuantityMap[item.ID] {
+			ok = false
+			failedIDs = append(failedIDs, struct {
+				ID   string
+				Want int32
+				Have int32
+			}{
+				ID:   item.ID,
+				Want: item.Quantity,
+				Have: idQuantityMap[item.ID],
+			})
+			break
+		}
+	}
+	if ok {
+		return nil
+	}
+	return domain.ExceedStockError{FailedIDs: failedIDs}
 }

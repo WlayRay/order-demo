@@ -2,29 +2,18 @@ package adapters
 
 import (
 	"context"
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
 	"fmt"
 	_ "github.com/WlayRay/order-demo/common/config"
+	"github.com/WlayRay/order-demo/common/db"
 	domain "github.com/WlayRay/order-demo/order/domain/order"
 	"github.com/WlayRay/order-demo/order/ent"
 	orderModel "github.com/WlayRay/order-demo/order/ent/order"
 	"github.com/WlayRay/order-demo/order/entity"
 	_ "github.com/lib/pq" // 驱动导入
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"reflect"
 	"strconv"
 	"time"
-)
-
-var (
-	host       = viper.GetString("postgres.host")
-	port       = viper.GetInt("postgres.port")
-	user       = viper.GetString("postgres.user")
-	password   = viper.GetString("postgres.password")
-	dbName     = viper.GetString("postgres.dbname")
-	searchPath = viper.GetString("postgres.search-path")
 )
 
 type OrderRepositoryPG struct {
@@ -36,33 +25,15 @@ func NewOrderRepositoryPG(db *ent.Client) *OrderRepositoryPG {
 }
 
 func NewEntClient() *ent.Client {
-	dsn := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s search_path=%s sslmode=disable connect_timeout=5",
-		host, port, user, password, dbName, searchPath,
-	)
-
-	drv, err := sql.Open(dialect.Postgres, dsn)
+	drv, err := db.GetPGSQLConn()
 	if err != nil {
-		panic(fmt.Sprintf("failed opening database connection: %v", err))
+		panic(err)
 	}
-
-	db := drv.DB()
-	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(10)
-	db.SetConnMaxLifetime(30 * time.Minute)
-	db.SetConnMaxIdleTime(10 * time.Minute)
 
 	client := ent.NewClient(
 		ent.Driver(drv),
 		ent.Debug(),
 	)
-
-	// 验证数据库连接
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := db.PingContext(ctx); err != nil {
-		panic(fmt.Sprintf("database connection failed: %v", err))
-	}
 
 	return client
 }

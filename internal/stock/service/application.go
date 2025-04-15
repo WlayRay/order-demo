@@ -11,7 +11,7 @@ import (
 )
 
 func NewApplication(ctx context.Context) app.Application {
-	stockRepo := adapters.NewMemoryStockRepository()
+	stockRepo := adapters.NewStockRepositoryPG(adapters.NewEntClient())
 	stripeAPI := integration.NewStripeAPI()
 	logger := zap.L()
 	metricClient := metrics.TodoMetrics{}
