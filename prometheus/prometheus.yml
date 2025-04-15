@@ -1,0 +1,25 @@
+# 全局配置
+global:
+  scrape_interval: 15s # 数据采集间隔，默认15秒
+  evaluation_interval: 15s # 规则评估间隔，默认15秒
+  scrape_timeout: 10s # 单次采集超时时间，默认10秒
+
+## Alertmanager 配置（可选）
+#alerting:
+#  alertmanagers:
+#    - static_configs:
+#        - targets:
+#            - "alertmanager:9093" # Alertmanager 的地址
+#
+## 规则文件配置（可选）
+#rule_files:
+#  - "rules/*.yml" # 指定规则文件路径
+
+# 数据采集目标配置
+scrape_configs:
+  # 默认采集 Prometheus 自身的指标
+  - job_name: "server-metrics"
+    metrics_path: "/metrics"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['host.docker.internal:9123', 'host.docker.internal:9124', 'host.docker.internal:9125'] # Prometheus 自身的地址

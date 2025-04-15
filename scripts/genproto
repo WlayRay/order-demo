@@ -14,7 +14,6 @@ source ./scripts/lib.sh
 API_ROOT="api"
 
 function dirs {
-function dirs {
     dirs=()
     while IFS= read -r dir; do
       dirs+=("$dir")

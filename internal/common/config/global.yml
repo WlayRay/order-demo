@@ -1,33 +1,36 @@
-fallback-grpc-addr: 0.0.0.0:12305
+fallback-grpc-addr: 127.0.0.1:12305
 zap-level: debug
 dial-grpc-timeout: 12s
 
 jaeger:
-  url: "http://0.0.0.0:14268/api/traces"
+  url: "http://127.0.0.1:14268/api/traces"
 
 etcd:
   endpoints:
-    - "0.0.0.0:2379"
-    - "0.0.0.0:2380"
-    - "0.0.0.0:2381"
+    - "127.0.0.1:2379"
+    - "127.0.0.1:2380"
+    - "127.0.0.1:2381"
 
 order:
   service-name: order
   server-to-run: http
-  http-addr: 0.0.0.0:9000
-  grpc-addr: 0.0.0.0:12306
+  http-addr: 127.0.0.1:9000
+  grpc-addr: 127.0.0.1:12306
+  metrics-export-addr: 127.0.0.1:9123
 
 stock:
   service-name: stock
   server-to-run: grpc
-  http-addr: 0.0.0.0:9001
-  grpc-addr: 0.0.0.0:12307
+  http-addr: 127.0.0.1:9001
+  grpc-addr: 127.0.0.1:12307
+  metrics-export-addr: 127.0.0.1:9124
 
 payment:
   service-name: payment
   server-to-run: http
-  http-addr: 0.0.0.0:9002
-  grpc-addr: 0.0.0.0:12308
+  http-addr: 127.0.0.1:9002
+  grpc-addr: 127.0.0.1:12308
+  metrics-export-addr: 127.0.0.1:9125
 
 goods:
   service-name: goods
@@ -35,7 +38,7 @@ goods:
 rabbitmq:
   user: guest
   password: guest
-  host: 0.0.0.0
+  host: 127.0.0.1
   port: 5672
   max-retry-count: 3
 
