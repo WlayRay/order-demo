@@ -3,41 +3,28 @@ package etcd
 import (
 	"context"
 	"errors"
+	"fmt"
+	"github.com/WlayRay/order-demo/common/db"
 	etcdv3 "go.etcd.io/etcd/client/v3"
 	"go.uber.org/zap"
 	"strings"
 	"sync"
-	"time"
 )
 
 type Registry struct {
 	client *etcdv3.Client
 }
 
-// GetEtcdClient returns a new etcd registry client.
-func GetEtcdClient(etcdEndpoints []string) (*Registry, error) {
-	once.Do(func() {
-		cli, e := etcdv3.New(etcdv3.Config{
-			Endpoints:          etcdEndpoints,
-			DialTimeout:        5 * time.Second,
-			MaxCallSendMsgSize: 10 * 1024 * 1024, // 设置发送消息的最大大小
-			MaxCallRecvMsgSize: 10 * 1024 * 1024, // 设置接收消息的最大大小
-		})
-
-		if e != nil {
-			err = e
-			return
-		}
-
-		etcdClient = &Registry{
-			client: cli,
-		}
-	})
+// GetRegistry returns a new etcd registry client.
+func GetRegistry(etcdEndpoints []string) (*Registry, error) {
+	etcdClient, err := db.GetEtcdClient(etcdEndpoints)
 
 	if err != nil {
 		return nil, err
 	}
-	return etcdClient, nil
+	return &Registry{
+		client: etcdClient,
+	}, nil
 }
 
 // Register registers a service instance in etcd.
@@ -94,7 +81,7 @@ func (r Registry) HealthCheck(instanceID, serviceName string) error {
 	}
 
 	if resp.Count == 0 {
-		return errors.New("service instance not found")
+		return fmt.Errorf("%s service instance not found", serviceName)
 	}
 
 	// 为每个键续租
