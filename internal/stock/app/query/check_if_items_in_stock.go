@@ -2,12 +2,20 @@ package query
 
 import (
 	"context"
+	"fmt"
+	"github.com/WlayRay/order-demo/common/db"
 	"github.com/WlayRay/order-demo/common/decorator"
 	domain "github.com/WlayRay/order-demo/stock/domain/stock"
 	"github.com/WlayRay/order-demo/stock/entity"
 	"github.com/WlayRay/order-demo/stock/infrastructure/integration"
+	"go.etcd.io/etcd/client/v3/concurrency"
 	"go.uber.org/zap"
+	"strings"
+	"sync"
+	"time"
 )
+
+const ETCDLockPrefix = "/stock/lock/"
 
 type CheckIfItemsInStock struct {
 	Items []*entity.ItemWithQuantity
@@ -44,11 +52,20 @@ func NewCheckIfItemsInStockHandler(stockRepo domain.Repository,
 //}
 
 func (c checkIfItemInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*entity.Item, error) {
-	if err := c.checkStock(ctx, query.Items); err != nil {
+	session, mutex, err := lock(ctx, getLockKey(query))
+	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		var releaseErr error
+		releaseErr = mutex.Unlock(ctx)
+		releaseErr = session.Close()
+		if releaseErr != nil {
+			zap.L().Warn("etcd unlock failed", zap.Error(releaseErr))
+		}
+	}()
 
-	var res []*entity.Item
+	res := make([]*entity.Item, 0, len(query.Items))
 	for i := range len(query.Items) {
 		priceID, err := c.stripeAPI.GetPriceByProductID(ctx, query.Items[i].ID)
 		if err != nil || priceID == "" {
@@ -61,8 +78,49 @@ func (c checkIfItemInStockHandler) Handle(ctx context.Context, query CheckIfItem
 			PriceID:  priceID,
 		})
 	}
-	// TODO: 扣减库存
+	// TODO: 拆分出扣减库存的逻辑（如果需要的话）
+	if err := c.checkStock(ctx, query.Items); err != nil {
+		return nil, err
+	}
 	return res, nil
+}
+
+var lockKeyBuilderPool = sync.Pool{
+	New: func() interface{} {
+		return &strings.Builder{}
+	},
+}
+
+func getLockKey(query CheckIfItemsInStock) string {
+	builder := lockKeyBuilderPool.Get().(*strings.Builder)
+	defer func() {
+		builder.Reset()
+		lockKeyBuilderPool.Put(builder)
+	}()
+
+	builder.WriteString(ETCDLockPrefix)
+	for _, item := range query.Items {
+		builder.WriteByte('-')
+		builder.WriteString(item.ID)
+	}
+	return builder.String()
+}
+
+func lock(ctx context.Context, key string) (*concurrency.Session, *concurrency.Mutex, error) {
+	etcdClient, _ := db.GetEtcdClient()
+	timeoutCtx, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
+	defer cancel()
+
+	if session, err := concurrency.NewSession(etcdClient); err != nil {
+		return nil, nil, err
+	} else {
+		mutex := concurrency.NewMutex(session, key)
+		if err := mutex.Lock(timeoutCtx); err != nil {
+			return nil, nil, err
+		} else {
+			return session, mutex, nil
+		}
+	}
 }
 
 func (c checkIfItemInStockHandler) checkStock(ctx context.Context, query []*entity.ItemWithQuantity) error {
@@ -106,7 +164,34 @@ func (c checkIfItemInStockHandler) checkStock(ctx context.Context, query []*enti
 		}
 	}
 	if ok {
-		return nil
+		return c.stockRepo.UpdateStock(ctx, query, func(
+			ctx context.Context,
+			existing []*entity.ItemWithQuantity,
+			query []*entity.ItemWithQuantity,
+		) error {
+			// 创建现有库存的映射，提高查找效率
+			stockMap := make(map[string]*entity.ItemWithQuantity, len(existing))
+			for _, item := range existing {
+				stockMap[item.ID] = item
+			}
+
+			for _, item := range query {
+				existingItem, ok := stockMap[item.ID]
+				if !ok {
+					return fmt.Errorf("商品 %s 不存在", item.ID)
+				}
+
+				// 再次验证库存是否充足
+				if existingItem.Quantity < item.Quantity {
+					return fmt.Errorf("商品 %s 库存不足，当前库存: %d, 需求数量: %d",
+						item.ID, existingItem.Quantity, item.Quantity)
+				}
+				existingItem.Quantity -= item.Quantity
+			}
+
+			return nil
+		})
 	}
+
 	return domain.ExceedStockError{FailedIDs: failedIDs}
 }

@@ -15,8 +15,8 @@ type Registry struct {
 }
 
 // GetRegistry returns a new etcd registry client.
-func GetRegistry(etcdEndpoints []string) (*Registry, error) {
-	etcdClient, err := db.GetEtcdClient(etcdEndpoints)
+func GetRegistry() (*Registry, error) {
+	etcdClient, err := db.GetEtcdClient()
 
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (r Registry) HealthCheck(instanceID, serviceName string) error {
 
 	// 为每个键续租
 	for _, kv := range resp.Kvs {
-		leaseResp, err := r.client.Grant(ctx, 3) // 创建3秒的租约
+		leaseResp, err := r.client.Grant(ctx, 60) // 创建3秒的租约
 		if err != nil {
 			return err
 		}

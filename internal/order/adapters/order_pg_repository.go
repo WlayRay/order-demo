@@ -110,19 +110,6 @@ func (o OrderRepositoryPG) Get(ctx context.Context, id, customerID string) (*dom
 }
 
 func (o OrderRepositoryPG) Update(ctx context.Context, order *domain.Order, updateFn func(context.Context, *domain.Order) (*domain.Order, error)) error {
-	// 首先检查订单是否存在
-	exist, err := o.db.Order.Query().
-		Where(
-			orderModel.OrderID(order.ID),
-			orderModel.CustomerID(order.CustomerID),
-		).Exist(ctx)
-	if err != nil {
-		return fmt.Errorf("检查订单是否存在时发生错误: %w", err)
-	}
-	if !exist {
-		return fmt.Errorf("订单不存在，orderID: %s, customerID: %s", order.ID, order.CustomerID)
-	}
-
 	// 开启事务
 	tx, err := o.db.Tx(ctx)
 	if err != nil {
