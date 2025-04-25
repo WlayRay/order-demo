@@ -22,7 +22,7 @@ func NewGetCustomerOrderHandler(orderRepo domain.Repository, logger *zap.Logger,
 	if orderRepo == nil {
 		panic("orderRepo is nil")
 	}
-	return decorator.ApplyQueryDecorators[GetCustomerOrder, *domain.Order](
+	return decorator.ApplyQueryDecorators(
 		getCustomerOrderHandler{orderRepo: orderRepo},
 		logger,
 		metricClient,

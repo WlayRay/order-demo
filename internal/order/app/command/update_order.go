@@ -24,7 +24,7 @@ func NewUpdateOrderHandler(orderRepo domain.Repository, logger *zap.Logger, metr
 		panic("orderRepo is nil")
 	}
 
-	return decorator.ApplyCommandDecorators[UpdateOrder, any](
+	return decorator.ApplyCommandDecorators(
 		updateOrderHandler{
 			orderRepo: orderRepo,
 		},

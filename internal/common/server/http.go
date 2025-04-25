@@ -4,13 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.uber.org/zap"
 )
 
 // RunHTTPServer starts an HTTP server.
 func RunHTTPServer(serviceName string, wrapper func(router *gin.Engine)) {
 	addr := viper.Sub(serviceName).GetString("http-addr")
 	if addr == "" {
-		// TODO 加入告警日志
+		zap.L().Fatal("http-addr not found in config, cannot start server", zap.String("service", serviceName))
 	}
 	RunHTTPServerOnAddr(addr, wrapper)
 }

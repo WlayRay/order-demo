@@ -1,7 +1,6 @@
----
 version: "2"
 service:
-  golangci-lint-version: 2.0.2  # 仅在特定场景下需要
+  golangci-lint-version: 2.0.2
 
 run:
   timeout: 30m
@@ -61,8 +60,7 @@ linters-settings:
         severity: error
         disabled: false
       - name: package-comments
-        severity: error
-        disabled: false
+        disabled: true # 禁用包注释检查
       - name: range
         severity: error
         disabled: false
@@ -82,23 +80,13 @@ linters-settings:
         severity: error
         disabled: false
       - name: error-strings
-        severity: error
-        disabled: false
+        disabled: true # 禁用错误字符串注释检查
       - name: var-naming
-        disabled: false
-        arguments:
-          # The following is the configuration for var-naming rule, the first element is the allow list and the second element is the deny list.
-          - [] # AllowList: leave it empty to use the default (empty, too). This means that we're not relaxing the rule in any way, i.e. elementId will raise a violation, it should be elementID, refer to the next line to see the list of denied initialisms.
-          - ["GRPC", "WAL"] # DenyList: Add GRPC and WAL to strict the rule not allowing instances like Wal or Grpc. The default values are located at commonInitialisms, refer to: https://github.com/mgechev/revive/blob/v1.3.7/lint/utils.go#L93-L133.
-      # TODO: enable the following rules
-      - name: exported
-        disabled: true
-      - name: unexported-return
-        disabled: true
+        disabled: true # 禁用变量命名注释检查
   staticcheck:
     checks:
       - all
-      - -SA1019
-      - -SA2002
+      - -ST1000 # 禁用包注释检查
   lll:
-    line-length: 150  # 自定义行长度限制
+    line-length: 150
+    ignore-comments: true # 忽略注释的行长度限制

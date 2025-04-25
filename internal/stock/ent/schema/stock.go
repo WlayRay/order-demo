@@ -1,9 +1,10 @@
 package schema
 
 import (
+	"time"
+
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
-	"time"
 )
 
 // Stock holds the schema definition for the Stock entity.
@@ -15,6 +16,7 @@ type Stock struct {
 func (Stock) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Unique(),
+		field.String("name").MaxLen(300),
 		field.String("product_id").MaxLen(300).NotEmpty(),
 		field.Int32("quantity").Min(0),
 		field.Time("created_at").Default(func() time.Time { return time.Now() }),
