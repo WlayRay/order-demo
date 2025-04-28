@@ -3,17 +3,20 @@ package adapters
 import (
 	"context"
 	"fmt"
+	"hash/fnv"
+	"reflect"
+	"strconv"
+	"time"
+
 	_ "github.com/WlayRay/order-demo/common/config"
 	"github.com/WlayRay/order-demo/common/db"
+	"github.com/WlayRay/order-demo/common/lib"
 	domain "github.com/WlayRay/order-demo/order/domain/order"
 	"github.com/WlayRay/order-demo/order/ent"
 	orderModel "github.com/WlayRay/order-demo/order/ent/order"
 	"github.com/WlayRay/order-demo/order/entity"
 	_ "github.com/lib/pq" // 驱动导入
 	"go.uber.org/zap"
-	"reflect"
-	"strconv"
-	"time"
 )
 
 type OrderRepositoryPG struct {
@@ -51,9 +54,25 @@ func (o OrderRepositoryPG) Create(ctx context.Context, order *domain.Order) (*do
 		}
 	}
 
-	// 使用Ent执行创建操作
+	ip, err := lib.GetLocalIP()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get local IP: %w", err)
+	}
+
+	h := fnv.New64a()
+	h.Write([]byte(ip))
+	instance, err := lib.GetSnowflakeInstance(h.Sum64()%1024, 10*time.Millisecond)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create snowflake instance: %w", err)
+	}
+
+	id, err := instance.GetID()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get snowflake ID: %w", err)
+	}
+
 	created, err := o.db.Order.Create().
-		SetOrderID(strconv.FormatInt(time.Now().Unix(), 10)). // 业务订单号
+		SetOrderID(strconv.FormatUint(id, 10)).
 		SetCustomerID(order.CustomerID).
 		SetStatus(order.Status).
 		SetPaymentLink(order.PaymentLink).
