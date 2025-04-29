@@ -11,7 +11,7 @@ type CommandHandler[C, R any] interface {
 
 // ApplyCommandDecorators applies decorators to a command handler.
 func ApplyCommandDecorators[C, R any](handler QueryHandler[C, R], logger *zap.Logger, metricsClient MetricsClient) QueryHandler[C, R] {
-	return queryLoggingDecorator[C, R]{
+	return commandLoggingDecorator[C, R]{
 		logger: logger,
 		base: commandMetricsDecorator[C, R]{
 			base:   handler,
