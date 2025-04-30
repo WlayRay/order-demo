@@ -6,6 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商品展示</title>
     <style>
+        /* 导航栏样式 */
+        .navbar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        /* 搜索框容器 */
+        .search-container {
+            margin-right: 20px;
+        }
+
+        /* 搜索框样式 */
+        .search-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+            font-size: 14px;
+        }
+
+        /* 头像容器 */
+        .avatar-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        /* 头像图片 */
+        .avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 1200px;
@@ -79,6 +119,72 @@
             background-color: #1f5fb9;
         }
 
+        /* 添加数量选择对话框样式 */
+        .quantity-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            width: 300px;
+        }
+
+        .quantity-dialog .dialog-img {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 5px;
+        }
+
+        .quantity-dialog input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .dialog-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .dialog-buttons button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .dialog-buttons .confirm-btn {
+            background-color: #2b7ce9;
+            color: white;
+        }
+
+        .dialog-buttons .cancel-btn {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .dialog-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
         @media (max-width: 768px) {
             .product-card {
                 width: calc(50% - 15px);
@@ -98,6 +204,14 @@
 </head>
 
 <body>
+    <nav class="navbar">
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="搜索...">
+        </div>
+        <div class="avatar-container">
+            <img src="./pictures/Cola.jpg" alt="用户头像" class="avatar">
+        </div>
+    </nav>
     <div class="product-container">
         <!-- 商品卡片模板 -->
         <div class="product-card">
@@ -105,7 +219,7 @@
             <div class="product-info">
                 <h3 class="product-title">妮寇</h3>
                 <p class="product-price">¥ 99.00</p>
-                <button class="product-btn">立即购买</button>
+                <button class="product-btn" data-item-id="prod_S7JA1Yz9FrucyL">立即购买</button>
             </div>
         </div>
 
@@ -115,7 +229,7 @@
             <div class="product-info">
                 <h3 class="product-title">可乐</h3>
                 <p class="product-price">¥ 199.00</p>
-                <button class="product-btn">立即购买</button>
+                <button class="product-btn" data-item-id="prod_S7J7PmKxOhI2rl">立即购买</button>
             </div>
         </div>
 
@@ -124,10 +238,87 @@
             <div class="product-info">
                 <h3 class="product-title">头盔</h3>
                 <p class="product-price">¥ 299.00</p>
-                <button class="product-btn">立即购买</button>
+                <button class="product-btn" data-item-id="prod_S1KAaUeZCArbXF">立即购买</button>
             </div>
         </div>
     </div>
+
+    <!-- 添加数量选择对话框 -->
+    <div class="dialog-overlay"></div>
+    <div class="quantity-dialog">
+        <div class="dialog-img"></div>
+        <h3 class="dialog-title"></h3>
+        <p class="dialog-price"></p>
+        <input type="number" min="1" value="1" id="quantity-input">
+        <div class="dialog-buttons">
+            <button class="cancel-btn">取消</button>
+            <button class="confirm-btn">确认购买</button>
+        </div>
+    </div>
+
+    <script>
+        const dialog = document.querySelector('.quantity-dialog');
+        const overlay = document.querySelector('.dialog-overlay');
+        let currentItemId = '';
+        let currentButton = null;
+
+        document.querySelectorAll('.product-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                currentButton = this;
+                currentItemId = this.getAttribute('data-item-id');
+                const card = this.closest('.product-card');
+                const productImg = card.querySelector('.product-img').style.backgroundImage;
+                const productTitle = card.querySelector('.product-title').textContent;
+                const productPrice = card.querySelector('.product-price').textContent;
+
+                dialog.querySelector('.dialog-img').style.backgroundImage = productImg;
+                dialog.querySelector('.dialog-title').textContent = productTitle;
+                dialog.querySelector('.dialog-price').textContent = productPrice;
+                dialog.querySelector('#quantity-input').value = 1;
+
+                dialog.style.display = 'block';
+                overlay.style.display = 'block';
+            });
+        });
+
+        dialog.querySelector('.cancel-btn').addEventListener('click', () => {
+            dialog.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+
+        dialog.querySelector('.confirm-btn').addEventListener('click', () => {
+            const quantity = parseInt(dialog.querySelector('#quantity-input').value) || 1;
+            const customerID = "5216"; // 固定的 customerID
+
+            fetch('http://localhost:9000/api/customer/1024/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customerID: customerID,
+                    items: [
+                        {
+                            id: currentItemId,
+                            quantity: quantity
+                        }
+                    ]
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    dialog.style.display = 'none';
+                    overlay.style.display = 'none';
+
+                    // 检查响应中是否包含 redirectURL，如果有则进行跳转
+                    if (data.data && data.data.redirectURL) {
+                        window.location.href = data.data.redirectURL;
+                    }
+                })
+                .catch((error) => console.error('Error:', error));
+        });
+    </script>
 </body>
 
 </html>
