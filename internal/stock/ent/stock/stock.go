@@ -13,6 +13,8 @@ const (
 	Label = "stock"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldProductID holds the string denoting the product_id field in the database.
 	FieldProductID = "product_id"
 	// FieldQuantity holds the string denoting the quantity field in the database.
@@ -28,6 +30,7 @@ const (
 // Columns holds all SQL columns for stock fields.
 var Columns = []string{
 	FieldID,
+	FieldName,
 	FieldProductID,
 	FieldQuantity,
 	FieldCreatedAt,
@@ -45,6 +48,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// NameValidator is a validator for the "name" field. It is called by the builders before save.
+	NameValidator func(string) error
 	// ProductIDValidator is a validator for the "product_id" field. It is called by the builders before save.
 	ProductIDValidator func(string) error
 	// QuantityValidator is a validator for the "quantity" field. It is called by the builders before save.
@@ -63,6 +68,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByProductID orders the results by the product_id field.

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/WlayRay/order-demo/common/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
@@ -31,5 +32,6 @@ func RunHTTPServerOnAddr(addr string, wrapper func(router *gin.Engine)) {
 func setMiddleware(router *gin.Engine) {
 	router.Use(gin.Recovery())
 	router.Use(gin.Logger())
+	router.Use(middleware.CORS())
 	router.Use(otelgin.Middleware("default_server"))
 }
