@@ -17,7 +17,6 @@ func NewStripeAPI() *StripeAPI {
 }
 
 func (s StripeAPI) GetPriceByProductID(ctx context.Context, pid string) (string, error) {
-	// TODO: 加入日志
 	stripe.Key = s.apikey
 	result, err := product.Get(pid, &stripe.ProductParams{})
 	if err != nil {

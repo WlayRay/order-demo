@@ -15,8 +15,12 @@ import (
 func init() {
 	stockFields := schema.Stock{}.Fields()
 	_ = stockFields
+	// stockDescName is the schema descriptor for name field.
+	stockDescName := stockFields[1].Descriptor()
+	// stock.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	stock.NameValidator = stockDescName.Validators[0].(func(string) error)
 	// stockDescProductID is the schema descriptor for product_id field.
-	stockDescProductID := stockFields[1].Descriptor()
+	stockDescProductID := stockFields[2].Descriptor()
 	// stock.ProductIDValidator is a validator for the "product_id" field. It is called by the builders before save.
 	stock.ProductIDValidator = func() func(string) error {
 		validators := stockDescProductID.Validators
@@ -34,15 +38,15 @@ func init() {
 		}
 	}()
 	// stockDescQuantity is the schema descriptor for quantity field.
-	stockDescQuantity := stockFields[2].Descriptor()
+	stockDescQuantity := stockFields[3].Descriptor()
 	// stock.QuantityValidator is a validator for the "quantity" field. It is called by the builders before save.
 	stock.QuantityValidator = stockDescQuantity.Validators[0].(func(int32) error)
 	// stockDescCreatedAt is the schema descriptor for created_at field.
-	stockDescCreatedAt := stockFields[3].Descriptor()
+	stockDescCreatedAt := stockFields[4].Descriptor()
 	// stock.DefaultCreatedAt holds the default value on creation for the created_at field.
 	stock.DefaultCreatedAt = stockDescCreatedAt.Default.(func() time.Time)
 	// stockDescUpdatedAt is the schema descriptor for updated_at field.
-	stockDescUpdatedAt := stockFields[4].Descriptor()
+	stockDescUpdatedAt := stockFields[5].Descriptor()
 	// stock.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	stock.DefaultUpdatedAt = stockDescUpdatedAt.Default.(func() time.Time)
 	// stock.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -2,8 +2,9 @@ package query
 
 import (
 	"context"
+
 	"github.com/WlayRay/order-demo/common/decorator"
-	domain "github.com/WlayRay/order-demo/stock/domain/stock"
+	"github.com/WlayRay/order-demo/stock/domain"
 	"github.com/WlayRay/order-demo/stock/entity"
 	"go.uber.org/zap"
 )
@@ -28,7 +29,7 @@ func (g getItemsHandler) Handle(ctx context.Context, query GetItems) ([]*entity.
 
 func NewGetItemsHandler(stockRepo domain.Repository, logger *zap.Logger, metricClient decorator.MetricsClient) GetItemsHandler {
 	if stockRepo != nil {
-		return decorator.ApplyQueryDecorators[GetItems, []*entity.Item](
+		return decorator.ApplyQueryDecorators(
 			getItemsHandler{stockRepo: stockRepo},
 			logger,
 			metricClient,

@@ -262,12 +262,12 @@ func (sq *StockQuery) Clone() *StockQuery {
 // Example:
 //
 //	var v []struct {
-//		ProductID string `json:"product_id,omitempty"`
+//		Name string `json:"name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Stock.Query().
-//		GroupBy(stock.FieldProductID).
+//		GroupBy(stock.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (sq *StockQuery) GroupBy(field string, fields ...string) *StockGroupBy {
@@ -285,11 +285,11 @@ func (sq *StockQuery) GroupBy(field string, fields ...string) *StockGroupBy {
 // Example:
 //
 //	var v []struct {
-//		ProductID string `json:"product_id,omitempty"`
+//		Name string `json:"name,omitempty"`
 //	}
 //
 //	client.Stock.Query().
-//		Select(stock.FieldProductID).
+//		Select(stock.FieldName).
 //		Scan(ctx, &v)
 func (sq *StockQuery) Select(fields ...string) *StockSelect {
 	sq.ctx.Fields = append(sq.ctx.Fields, fields...)

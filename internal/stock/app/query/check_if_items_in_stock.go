@@ -3,16 +3,16 @@ package query
 import (
 	"context"
 	"fmt"
-	"github.com/WlayRay/order-demo/common/db"
-	"github.com/WlayRay/order-demo/common/decorator"
-	domain "github.com/WlayRay/order-demo/stock/domain/stock"
-	"github.com/WlayRay/order-demo/stock/entity"
-	"github.com/WlayRay/order-demo/stock/infrastructure/integration"
-	"go.etcd.io/etcd/client/v3/concurrency"
-	"go.uber.org/zap"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/WlayRay/order-demo/common/db"
+	"github.com/WlayRay/order-demo/common/decorator"
+	"github.com/WlayRay/order-demo/stock/domain"
+	"github.com/WlayRay/order-demo/stock/entity"
+	"go.etcd.io/etcd/client/v3/concurrency"
+	"go.uber.org/zap"
 )
 
 const ETCDLockPrefix = "/stock/lock/"
@@ -23,13 +23,13 @@ type CheckIfItemsInStock struct {
 
 type CheckIfItemsInStockHandler decorator.QueryHandler[CheckIfItemsInStock, []*entity.Item]
 
-type checkIfItemInStockHandler struct {
+type checkIfItemsInStockHandler struct {
 	stockRepo domain.Repository
-	stripeAPI *integration.StripeAPI
+	stripeAPI domain.StripeAPIInterface
 }
 
 func NewCheckIfItemsInStockHandler(stockRepo domain.Repository,
-	stripeAPI *integration.StripeAPI,
+	stripeAPI domain.StripeAPIInterface,
 	logger *zap.Logger,
 	metricClient decorator.MetricsClient) CheckIfItemsInStockHandler {
 	if stripeAPI == nil {
@@ -38,8 +38,8 @@ func NewCheckIfItemsInStockHandler(stockRepo domain.Repository,
 	if stockRepo == nil {
 		panic("stockRepo is nil")
 	}
-	return decorator.ApplyQueryDecorators[CheckIfItemsInStock, []*entity.Item](
-		checkIfItemInStockHandler{stockRepo: stockRepo, stripeAPI: stripeAPI},
+	return decorator.ApplyQueryDecorators(
+		checkIfItemsInStockHandler{stockRepo: stockRepo, stripeAPI: stripeAPI},
 		logger,
 		metricClient,
 	)
@@ -51,25 +51,24 @@ func NewCheckIfItemsInStockHandler(stockRepo domain.Repository,
 //	"price_1RD4XoPNegMNE0Wf9is4F4Wg",
 //}
 
-func (c checkIfItemInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*entity.Item, error) {
+func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*entity.Item, error) {
 	session, mutex, err := lock(ctx, getLockKey(query))
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
-		var releaseErr error
-		releaseErr = mutex.Unlock(ctx)
-		releaseErr = session.Close()
-		if releaseErr != nil {
-			zap.L().Warn("etcd unlock failed", zap.Error(releaseErr))
+		releaseErr := mutex.Unlock(ctx)
+		closeErr := session.Close()
+		if releaseErr != nil || closeErr != nil {
+			zap.L().Warn("etcd unlock failed", zap.Error(releaseErr), zap.Error(closeErr))
 		}
 	}()
 
 	res := make([]*entity.Item, 0, len(query.Items))
-	for i := range len(query.Items) {
-		priceID, err := c.stripeAPI.GetPriceByProductID(ctx, query.Items[i].ID)
+	for i, item := range query.Items {
+		priceID, err := c.stripeAPI.GetPriceByProductID(ctx, item.ID)
 		if err != nil || priceID == "" {
-			zap.L().Warn("GetPriceByProductID", zap.String("productID", query.Items[i].ID), zap.Error(err))
+			zap.L().Warn("GetPriceByProductID", zap.String("productID", item.ID), zap.Error(err))
 			return nil, err
 		}
 		res = append(res, &entity.Item{
@@ -86,7 +85,7 @@ func (c checkIfItemInStockHandler) Handle(ctx context.Context, query CheckIfItem
 }
 
 var lockKeyBuilderPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return &strings.Builder{}
 	},
 }
@@ -123,7 +122,7 @@ func lock(ctx context.Context, key string) (*concurrency.Session, *concurrency.M
 	}
 }
 
-func (c checkIfItemInStockHandler) checkStock(ctx context.Context, query []*entity.ItemWithQuantity) error {
+func (c checkIfItemsInStockHandler) checkStock(ctx context.Context, query []*entity.ItemWithQuantity) error {
 	ids := make([]string, 0, len(query))
 	for _, item := range query {
 		ids = append(ids, item.ID)

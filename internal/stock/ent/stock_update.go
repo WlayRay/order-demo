@@ -28,6 +28,20 @@ func (su *StockUpdate) Where(ps ...predicate.Stock) *StockUpdate {
 	return su
 }
 
+// SetName sets the "name" field.
+func (su *StockUpdate) SetName(s string) *StockUpdate {
+	su.mutation.SetName(s)
+	return su
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (su *StockUpdate) SetNillableName(s *string) *StockUpdate {
+	if s != nil {
+		su.SetName(*s)
+	}
+	return su
+}
+
 // SetProductID sets the "product_id" field.
 func (su *StockUpdate) SetProductID(s string) *StockUpdate {
 	su.mutation.SetProductID(s)
@@ -126,6 +140,11 @@ func (su *StockUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (su *StockUpdate) check() error {
+	if v, ok := su.mutation.Name(); ok {
+		if err := stock.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Stock.name": %w`, err)}
+		}
+	}
 	if v, ok := su.mutation.ProductID(); ok {
 		if err := stock.ProductIDValidator(v); err != nil {
 			return &ValidationError{Name: "product_id", err: fmt.Errorf(`ent: validator failed for field "Stock.product_id": %w`, err)}
@@ -150,6 +169,9 @@ func (su *StockUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := su.mutation.Name(); ok {
+		_spec.SetField(stock.FieldName, field.TypeString, value)
 	}
 	if value, ok := su.mutation.ProductID(); ok {
 		_spec.SetField(stock.FieldProductID, field.TypeString, value)
@@ -184,6 +206,20 @@ type StockUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *StockMutation
+}
+
+// SetName sets the "name" field.
+func (suo *StockUpdateOne) SetName(s string) *StockUpdateOne {
+	suo.mutation.SetName(s)
+	return suo
+}
+
+// SetNillableName sets the "name" field if the given value is not nil.
+func (suo *StockUpdateOne) SetNillableName(s *string) *StockUpdateOne {
+	if s != nil {
+		suo.SetName(*s)
+	}
+	return suo
 }
 
 // SetProductID sets the "product_id" field.
@@ -297,6 +333,11 @@ func (suo *StockUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (suo *StockUpdateOne) check() error {
+	if v, ok := suo.mutation.Name(); ok {
+		if err := stock.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Stock.name": %w`, err)}
+		}
+	}
 	if v, ok := suo.mutation.ProductID(); ok {
 		if err := stock.ProductIDValidator(v); err != nil {
 			return &ValidationError{Name: "product_id", err: fmt.Errorf(`ent: validator failed for field "Stock.product_id": %w`, err)}
@@ -338,6 +379,9 @@ func (suo *StockUpdateOne) sqlSave(ctx context.Context) (_node *Stock, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := suo.mutation.Name(); ok {
+		_spec.SetField(stock.FieldName, field.TypeString, value)
 	}
 	if value, ok := suo.mutation.ProductID(); ok {
 		_spec.SetField(stock.FieldProductID, field.TypeString, value)

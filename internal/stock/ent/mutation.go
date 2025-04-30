@@ -33,6 +33,7 @@ type StockMutation struct {
 	op            Op
 	typ           string
 	id            *int
+	name          *string
 	product_id    *string
 	quantity      *int32
 	addquantity   *int32
@@ -146,6 +147,42 @@ func (m *StockMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetName sets the "name" field.
+func (m *StockMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *StockMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Stock entity.
+// If the Stock object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StockMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *StockMutation) ResetName() {
+	m.name = nil
 }
 
 // SetProductID sets the "product_id" field.
@@ -346,7 +383,10 @@ func (m *StockMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StockMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
+	if m.name != nil {
+		fields = append(fields, stock.FieldName)
+	}
 	if m.product_id != nil {
 		fields = append(fields, stock.FieldProductID)
 	}
@@ -367,6 +407,8 @@ func (m *StockMutation) Fields() []string {
 // schema.
 func (m *StockMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case stock.FieldName:
+		return m.Name()
 	case stock.FieldProductID:
 		return m.ProductID()
 	case stock.FieldQuantity:
@@ -384,6 +426,8 @@ func (m *StockMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *StockMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case stock.FieldName:
+		return m.OldName(ctx)
 	case stock.FieldProductID:
 		return m.OldProductID(ctx)
 	case stock.FieldQuantity:
@@ -401,6 +445,13 @@ func (m *StockMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *StockMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case stock.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
 	case stock.FieldProductID:
 		v, ok := value.(string)
 		if !ok {
@@ -493,6 +544,9 @@ func (m *StockMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *StockMutation) ResetField(name string) error {
 	switch name {
+	case stock.FieldName:
+		m.ResetName()
+		return nil
 	case stock.FieldProductID:
 		m.ResetProductID()
 		return nil
