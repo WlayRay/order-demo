@@ -2,6 +2,7 @@ package command
 
 import (
 	"context"
+
 	"github.com/WlayRay/order-demo/common/decorator"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/payment/domain"
@@ -25,7 +26,7 @@ func (c createPaymentHandler) Handle(ctx context.Context, cmd CreatePayment) (st
 		return "", err
 	}
 
-	zap.L().Info("CreatePaymentHandler.Handle: CreatePaymentLink", zap.Any("order:", cmd.Order.ID), zap.Any("link:", link))
+	zap.L().Info("CreatePaymentHandler.Handle: CreatePaymentLink", zap.Any("order", cmd.Order), zap.Any("link", link))
 	newOrder := &orderpb.Order{
 		ID:          cmd.Order.ID,
 		CustomerID:  cmd.Order.CustomerID,
@@ -45,7 +46,7 @@ func NewCreatePaymentHandler(processor domain.Processor, orderGRPC OrderService,
 		panic("processor is nil")
 	}
 
-	return decorator.ApplyCommandDecorators[CreatePayment, string](
+	return decorator.ApplyCommandDecorators(
 		createPaymentHandler{
 			processor: processor,
 			orderGRPC: orderGRPC,

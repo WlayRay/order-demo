@@ -6,12 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/WlayRay/order-demo/common/broker"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
-	"time"
 )
 
 type OrderService interface {
@@ -104,6 +105,6 @@ func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Que
 
 func outbound(o *order) {
 	zap.L().Debug("order id paid, goods ready to outbound", zap.Int("goods num", len(o.Items)))
-	time.Sleep(2 * time.Second)
+	time.Sleep(3 * time.Second)
 	zap.L().Debug("outbound success", zap.String("order id", o.ID), zap.String("customer id", o.CustomerID))
 }

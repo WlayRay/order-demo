@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/common/tracing"
 	"github.com/stripe/stripe-go/v80"
@@ -32,14 +33,9 @@ func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.O
 	defer span.End()
 
 	var items []*stripe.CheckoutSessionLineItemParams
-	var priceIds = [3]string{
-		"price_1R7HVgPNegMNE0WfuwRkVr6b",
-		"price_1RD4V5PNegMNE0WfaN9nu9vo",
-		"price_1RD4XoPNegMNE0Wf9is4F4Wg",
-	}
 	for i := range len(order.Items) {
 		items = append(items, &stripe.CheckoutSessionLineItemParams{
-			Price:    stripe.String(priceIds[i]),
+			Price:    stripe.String(order.Items[i].PriceID),
 			Quantity: stripe.Int64(int64(order.Items[i].Quantity)),
 		})
 	}

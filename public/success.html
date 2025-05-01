@@ -9,7 +9,7 @@
         html {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #60e0fdbf, #10b9e3);
+            background: linear-gradient(135deg, #76d6ecab, #3ccaedd2);
             color: #fff;
             font-family: 'Arial', sans-serif;
         }
@@ -33,7 +33,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             padding: 20px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgb(255, 255, 255);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             border-radius: 12px;
             width: 220px;
@@ -115,6 +115,8 @@
                     document.getElementById('order-status').classList.add('hidden');
                 } else if (data.data.order.status === 'paid') {
                     order.Status = '支付成功，请稍等...';
+                    document.querySelector('.ready-popup').style.display = 'block';
+                    document.getElementById('orderId').innerText = orderID;
                     document.getElementById('orderStatus').innerText = order.Status;
                     document.querySelector('.after-payment-popup').style.display = 'none';
                     document.getElementById('order-message').classList.remove('hidden');
@@ -123,8 +125,6 @@
                 } else if (data.data.order.status === 'ready') {
                     order.Status = '已完成';
                     document.querySelector('.after-payment-popup').style.display = 'none';
-                    document.querySelector('.ready-popup').style.display = 'block';
-                    document.getElementById('orderId').innerText = orderID;
                     document.getElementById('orderStatus').innerText = order.Status;
                     document.getElementById('order-message').classList.remove('hidden');
                     document.getElementById('order-status').classList.remove('hidden');

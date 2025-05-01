@@ -17,14 +17,26 @@
             margin-bottom: 20px;
         }
 
-        /* 搜索框容器 */
+        /* 搜索框容器样式更新 */
         .search-container {
             margin-right: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
         }
 
-        /* 搜索框样式 */
+        /* 搜索图标样式 */
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            left: 10px;
+        }
+
+        /* 搜索框样式更新 */
         .search-input {
-            padding: 8px 12px;
+            padding: 8px 12px 8px 40px;
+            /* 左侧padding增加，为图标留出空间 */
             border: 1px solid #ddd;
             border-radius: 4px;
             width: 200px;
@@ -206,6 +218,7 @@
 <body>
     <nav class="navbar">
         <div class="search-container">
+            <img src="./pictures/搜索.jpg" alt="搜索" class="search-icon">
             <input type="text" class="search-input" placeholder="搜索...">
         </div>
         <div class="avatar-container">
@@ -218,7 +231,7 @@
             <div class="product-img" style="background-image: url('./pictures/妮寇.jpeg');"></div>
             <div class="product-info">
                 <h3 class="product-title">妮寇</h3>
-                <p class="product-price">¥ 99.00</p>
+                <p class="product-price">¥ 20.00</p>
                 <button class="product-btn" data-item-id="prod_S7JA1Yz9FrucyL">立即购买</button>
             </div>
         </div>
@@ -228,7 +241,7 @@
             <div class="product-img" style="background-image: url('./pictures/Cola.jpg');"></div>
             <div class="product-info">
                 <h3 class="product-title">可乐</h3>
-                <p class="product-price">¥ 199.00</p>
+                <p class="product-price">¥ 4.00</p>
                 <button class="product-btn" data-item-id="prod_S7J7PmKxOhI2rl">立即购买</button>
             </div>
         </div>
@@ -237,7 +250,7 @@
             <div class="product-img" style="background-image: url('./pictures/头盔.webp');"></div>
             <div class="product-info">
                 <h3 class="product-title">头盔</h3>
-                <p class="product-price">¥ 299.00</p>
+                <p class="product-price">¥ 10.00</p>
                 <button class="product-btn" data-item-id="prod_S1KAaUeZCArbXF">立即购买</button>
             </div>
         </div>

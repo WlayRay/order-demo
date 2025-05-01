@@ -46,9 +46,9 @@ func NewCheckIfItemsInStockHandler(stockRepo domain.Repository,
 }
 
 //var priceIds = [3]string{
-//	"price_1R7HVgPNegMNE0WfuwRkVr6b",
-//	"price_1RD4V5PNegMNE0WfaN9nu9vo",
-//	"price_1RD4XoPNegMNE0Wf9is4F4Wg",
+//	"price_1R7HVgPNegMNE0WfuwRkVr6b", // 头盔
+//	"price_1RD4V5PNegMNE0WfaN9nu9vo", // 可乐
+//	"price_1RD4XoPNegMNE0Wf9is4F4Wg", // 妮寇
 //}
 
 func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*entity.Item, error) {
