@@ -3,6 +3,7 @@ package adapters
 import (
 	"context"
 	"fmt"
+
 	"github.com/WlayRay/order-demo/common/db"
 	"github.com/WlayRay/order-demo/stock/ent"
 	stockModel "github.com/WlayRay/order-demo/stock/ent/stock"
@@ -32,13 +33,29 @@ func NewEntClient() *ent.Client {
 	return client
 }
 
-func (s StockRepositoryPG) GetItems(ctx context.Context, ids []string) ([]*entity.Item, error) {
-	//TODO implement me
-	panic("implement me")
+func (s StockRepositoryPG) GetItemInfo(ctx context.Context, id string) (*entity.ItemInfo, error) {
+	data, err := s.db.Stock.Query().
+		Where(stockModel.ProductID(id)).
+		Select(stockModel.FieldName, stockModel.FieldPrice, stockModel.FieldCreatedAt, stockModel.FieldUpdatedAt).
+		First(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &entity.ItemInfo{
+		Name:     data.Name,
+		Price:    data.Price,
+		CreateAt: data.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdateAt: data.UpdatedAt.Format("2006-01-02 15:04:05"),
+	}
+	return result, nil
 }
 
 func (s StockRepositoryPG) GetStock(ctx context.Context, ids []string) ([]*entity.ItemWithQuantity, error) {
-	data, err := s.batchGetStockByID(ctx, ids)
+	data, err := s.db.Stock.Query().
+		Where(stockModel.ProductIDIn(ids...)).
+		Select(stockModel.FieldProductID, stockModel.FieldQuantity).
+		All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -51,12 +68,6 @@ func (s StockRepositoryPG) GetStock(ctx context.Context, ids []string) ([]*entit
 		})
 	}
 	return result, nil
-}
-
-func (s StockRepositoryPG) batchGetStockByID(ctx context.Context, productIDs []string) ([]*ent.Stock, error) {
-	return s.db.Stock.Query().
-		Where(stockModel.ProductIDIn(productIDs...)).
-		All(ctx)
 }
 
 func (s StockRepositoryPG) UpdateStock(

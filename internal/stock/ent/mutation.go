@@ -34,6 +34,7 @@ type StockMutation struct {
 	typ           string
 	id            *int
 	name          *string
+	price         *string
 	product_id    *string
 	quantity      *int32
 	addquantity   *int32
@@ -183,6 +184,42 @@ func (m *StockMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *StockMutation) ResetName() {
 	m.name = nil
+}
+
+// SetPrice sets the "price" field.
+func (m *StockMutation) SetPrice(s string) {
+	m.price = &s
+}
+
+// Price returns the value of the "price" field in the mutation.
+func (m *StockMutation) Price() (r string, exists bool) {
+	v := m.price
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrice returns the old "price" field's value of the Stock entity.
+// If the Stock object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *StockMutation) OldPrice(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrice is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrice requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrice: %w", err)
+	}
+	return oldValue.Price, nil
+}
+
+// ResetPrice resets all changes to the "price" field.
+func (m *StockMutation) ResetPrice() {
+	m.price = nil
 }
 
 // SetProductID sets the "product_id" field.
@@ -383,9 +420,12 @@ func (m *StockMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *StockMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.name != nil {
 		fields = append(fields, stock.FieldName)
+	}
+	if m.price != nil {
+		fields = append(fields, stock.FieldPrice)
 	}
 	if m.product_id != nil {
 		fields = append(fields, stock.FieldProductID)
@@ -409,6 +449,8 @@ func (m *StockMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case stock.FieldName:
 		return m.Name()
+	case stock.FieldPrice:
+		return m.Price()
 	case stock.FieldProductID:
 		return m.ProductID()
 	case stock.FieldQuantity:
@@ -428,6 +470,8 @@ func (m *StockMutation) OldField(ctx context.Context, name string) (ent.Value, e
 	switch name {
 	case stock.FieldName:
 		return m.OldName(ctx)
+	case stock.FieldPrice:
+		return m.OldPrice(ctx)
 	case stock.FieldProductID:
 		return m.OldProductID(ctx)
 	case stock.FieldQuantity:
@@ -451,6 +495,13 @@ func (m *StockMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case stock.FieldPrice:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrice(v)
 		return nil
 	case stock.FieldProductID:
 		v, ok := value.(string)
@@ -546,6 +597,9 @@ func (m *StockMutation) ResetField(name string) error {
 	switch name {
 	case stock.FieldName:
 		m.ResetName()
+		return nil
+	case stock.FieldPrice:
+		m.ResetPrice()
 		return nil
 	case stock.FieldProductID:
 		m.ResetProductID()

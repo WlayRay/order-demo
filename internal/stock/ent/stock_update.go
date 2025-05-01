@@ -42,6 +42,20 @@ func (su *StockUpdate) SetNillableName(s *string) *StockUpdate {
 	return su
 }
 
+// SetPrice sets the "price" field.
+func (su *StockUpdate) SetPrice(s string) *StockUpdate {
+	su.mutation.SetPrice(s)
+	return su
+}
+
+// SetNillablePrice sets the "price" field if the given value is not nil.
+func (su *StockUpdate) SetNillablePrice(s *string) *StockUpdate {
+	if s != nil {
+		su.SetPrice(*s)
+	}
+	return su
+}
+
 // SetProductID sets the "product_id" field.
 func (su *StockUpdate) SetProductID(s string) *StockUpdate {
 	su.mutation.SetProductID(s)
@@ -145,6 +159,11 @@ func (su *StockUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Stock.name": %w`, err)}
 		}
 	}
+	if v, ok := su.mutation.Price(); ok {
+		if err := stock.PriceValidator(v); err != nil {
+			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Stock.price": %w`, err)}
+		}
+	}
 	if v, ok := su.mutation.ProductID(); ok {
 		if err := stock.ProductIDValidator(v); err != nil {
 			return &ValidationError{Name: "product_id", err: fmt.Errorf(`ent: validator failed for field "Stock.product_id": %w`, err)}
@@ -172,6 +191,9 @@ func (su *StockUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.Name(); ok {
 		_spec.SetField(stock.FieldName, field.TypeString, value)
+	}
+	if value, ok := su.mutation.Price(); ok {
+		_spec.SetField(stock.FieldPrice, field.TypeString, value)
 	}
 	if value, ok := su.mutation.ProductID(); ok {
 		_spec.SetField(stock.FieldProductID, field.TypeString, value)
@@ -218,6 +240,20 @@ func (suo *StockUpdateOne) SetName(s string) *StockUpdateOne {
 func (suo *StockUpdateOne) SetNillableName(s *string) *StockUpdateOne {
 	if s != nil {
 		suo.SetName(*s)
+	}
+	return suo
+}
+
+// SetPrice sets the "price" field.
+func (suo *StockUpdateOne) SetPrice(s string) *StockUpdateOne {
+	suo.mutation.SetPrice(s)
+	return suo
+}
+
+// SetNillablePrice sets the "price" field if the given value is not nil.
+func (suo *StockUpdateOne) SetNillablePrice(s *string) *StockUpdateOne {
+	if s != nil {
+		suo.SetPrice(*s)
 	}
 	return suo
 }
@@ -338,6 +374,11 @@ func (suo *StockUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Stock.name": %w`, err)}
 		}
 	}
+	if v, ok := suo.mutation.Price(); ok {
+		if err := stock.PriceValidator(v); err != nil {
+			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Stock.price": %w`, err)}
+		}
+	}
 	if v, ok := suo.mutation.ProductID(); ok {
 		if err := stock.ProductIDValidator(v); err != nil {
 			return &ValidationError{Name: "product_id", err: fmt.Errorf(`ent: validator failed for field "Stock.product_id": %w`, err)}
@@ -382,6 +423,9 @@ func (suo *StockUpdateOne) sqlSave(ctx context.Context) (_node *Stock, err error
 	}
 	if value, ok := suo.mutation.Name(); ok {
 		_spec.SetField(stock.FieldName, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.Price(); ok {
+		_spec.SetField(stock.FieldPrice, field.TypeString, value)
 	}
 	if value, ok := suo.mutation.ProductID(); ok {
 		_spec.SetField(stock.FieldProductID, field.TypeString, value)

@@ -26,6 +26,12 @@ func (sc *StockCreate) SetName(s string) *StockCreate {
 	return sc
 }
 
+// SetPrice sets the "price" field.
+func (sc *StockCreate) SetPrice(s string) *StockCreate {
+	sc.mutation.SetPrice(s)
+	return sc
+}
+
 // SetProductID sets the "product_id" field.
 func (sc *StockCreate) SetProductID(s string) *StockCreate {
 	sc.mutation.SetProductID(s)
@@ -127,6 +133,14 @@ func (sc *StockCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Stock.name": %w`, err)}
 		}
 	}
+	if _, ok := sc.mutation.Price(); !ok {
+		return &ValidationError{Name: "price", err: errors.New(`ent: missing required field "Stock.price"`)}
+	}
+	if v, ok := sc.mutation.Price(); ok {
+		if err := stock.PriceValidator(v); err != nil {
+			return &ValidationError{Name: "price", err: fmt.Errorf(`ent: validator failed for field "Stock.price": %w`, err)}
+		}
+	}
 	if _, ok := sc.mutation.ProductID(); !ok {
 		return &ValidationError{Name: "product_id", err: errors.New(`ent: missing required field "Stock.product_id"`)}
 	}
@@ -184,6 +198,10 @@ func (sc *StockCreate) createSpec() (*Stock, *sqlgraph.CreateSpec) {
 	if value, ok := sc.mutation.Name(); ok {
 		_spec.SetField(stock.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := sc.mutation.Price(); ok {
+		_spec.SetField(stock.FieldPrice, field.TypeString, value)
+		_node.Price = value
 	}
 	if value, ok := sc.mutation.ProductID(); ok {
 		_spec.SetField(stock.FieldProductID, field.TypeString, value)

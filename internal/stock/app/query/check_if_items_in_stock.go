@@ -45,12 +45,6 @@ func NewCheckIfItemsInStockHandler(stockRepo domain.Repository,
 	)
 }
 
-//var priceIds = [3]string{
-//	"price_1R7HVgPNegMNE0WfuwRkVr6b", // 头盔
-//	"price_1RD4V5PNegMNE0WfaN9nu9vo", // 可乐
-//	"price_1RD4XoPNegMNE0Wf9is4F4Wg", // 妮寇
-//}
-
 func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*entity.Item, error) {
 	session, mutex, err := lock(ctx, getLockKey(query))
 	if err != nil {
@@ -65,6 +59,11 @@ func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfIte
 	}()
 
 	res := make([]*entity.Item, 0, len(query.Items))
+	infos, err := c.stockRepo.GetItemInfo(ctx, query.Items[0].ID)
+	if err != nil {
+		zap.L().Error("GetItemInfo", zap.String("productID", query.Items[0].ID), zap.Error(err))
+		return nil, err
+	}
 	for i, item := range query.Items {
 		priceID, err := c.stripeAPI.GetPriceByProductID(ctx, item.ID)
 		if err != nil || priceID == "" {
@@ -75,6 +74,7 @@ func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfIte
 			ID:       query.Items[i].ID,
 			Quantity: query.Items[i].Quantity,
 			PriceID:  priceID,
+			Name:     infos.Name,
 		})
 	}
 	// TODO: 拆分出扣减库存的逻辑（如果需要的话）

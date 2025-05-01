@@ -17,7 +17,7 @@ func (q queryLoggingDecorator[C, R]) Handle(ctx context.Context, cmd C) (result 
 		zap.Any("query", generateActionName(cmd)),
 		zap.String("query_body", fmt.Sprintf("%+v", cmd)),
 	)
-	logger.Debug("Executing query")
+	// logger.Debug("Executing query")
 	defer func() {
 		if err != nil {
 			logger.Error("Query failed", zap.Error(err))
@@ -39,7 +39,7 @@ func (q commandLoggingDecorator[C, R]) Handle(ctx context.Context, cmd C) (resul
 		zap.Any("command", generateActionName(cmd)),
 		zap.String("command_body", fmt.Sprintf("%+v", cmd)),
 	)
-	logger.Debug("Executing command")
+	// logger.Debug("Executing command")
 	defer func() {
 		if err != nil {
 			logger.Error("Command failed", zap.Error(err))

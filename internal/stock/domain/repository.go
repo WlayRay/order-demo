@@ -3,12 +3,13 @@ package domain
 import (
 	"context"
 	"fmt"
-	"github.com/WlayRay/order-demo/stock/entity"
 	"strings"
+
+	"github.com/WlayRay/order-demo/stock/entity"
 )
 
 type Repository interface {
-	GetItems(ctx context.Context, ids []string) ([]*entity.Item, error)
+	GetItemInfo(ctx context.Context, id string) (*entity.ItemInfo, error)
 	GetStock(ctx context.Context, ids []string) ([]*entity.ItemWithQuantity, error)
 	UpdateStock(ctx context.Context,
 		query []*entity.ItemWithQuantity,

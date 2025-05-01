@@ -12,5 +12,4 @@ type Commands struct {
 
 type Queries struct {
 	CheckIfItemsInStock query.CheckIfItemsInStockHandler
-	GetItems            query.GetItemsHandler
 }

@@ -8,5 +8,4 @@ import (
 
 type StockService interface {
 	CheckItemsInStock(ctx context.Context, items []*orderpb.ItemWithQuantity) (*stockpb.CheckIfItemsInStockResponse, error)
-	GetItems(ctx context.Context, ids []string) ([]*orderpb.Item, error)
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	_ "github.com/WlayRay/order-demo/common/config"
 	"github.com/WlayRay/order-demo/common/metrics"
 	"github.com/WlayRay/order-demo/stock/adapters"
@@ -25,7 +26,6 @@ func NewApplication(ctx context.Context) app.Application {
 		Commands: app.Commands{},
 		Queries: app.Queries{
 			CheckIfItemsInStock: query.NewCheckIfItemsInStockHandler(stockRepo, stripeAPI, logger, metricClient),
-			GetItems:            query.NewGetItemsHandler(stockRepo, logger, metricClient),
 		},
 	}
 }

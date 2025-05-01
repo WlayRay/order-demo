@@ -21,11 +21,3 @@ func (s StockGRPC) CheckItemsInStock(ctx context.Context, items []*orderpb.ItemW
 	zap.L().Info("stock grpc response", zap.Any("resp", resp))
 	return resp, err
 }
-
-func (s StockGRPC) GetItems(ctx context.Context, itemsIDs []string) ([]*orderpb.Item, error) {
-	resp, err := s.client.GetItems(ctx, &stockpb.GetItemsRequest{ItemsIDs: itemsIDs})
-	if err != nil {
-		return nil, err
-	}
-	return resp.Items, nil
-}

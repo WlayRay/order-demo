@@ -5,17 +5,9 @@ option go_package = "github.com/WlayRay/order-demo/common/genproto/stockpb";
 
 import "orderpb/order.proto";
 
-service StockService{
-  rpc GetItems(GetItemsRequest) returns (GetItemsResponse);
-  rpc CheckIfItemsInStock(CheckIfItemsInStockRequest) returns (CheckIfItemsInStockResponse);
-}
-
-message GetItemsRequest {
-  repeated string ItemsIDs = 1;
-}
-
-message GetItemsResponse {
-  repeated orderpb.Item Items = 1;
+service StockService {
+  rpc CheckIfItemsInStock(CheckIfItemsInStockRequest)
+      returns (CheckIfItemsInStockResponse);
 }
 
 message CheckIfItemsInStockRequest {

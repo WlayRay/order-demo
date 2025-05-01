@@ -5,7 +5,7 @@ option go_package = "github.com/WlayRay/order-demo/common/genproto/orderpb";
 
 import "google/protobuf/empty.proto";
 
-service OrderService{
+service OrderService {
   rpc CreateOrder(CreateOrderRequest) returns (google.protobuf.Empty);
   rpc GetOrder(GetOrderRequest) returns (order);
   rpc UpdateOrder(order) returns (google.protobuf.Empty);
@@ -27,7 +27,7 @@ message ItemWithQuantity {
 }
 
 message Item {
-  string ID  = 1;
+  string ID = 1;
   string Name = 2;
   int32 Quantity = 3;
   string PriceID = 4;

@@ -17,11 +17,13 @@ type Stock struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Name holds the value of the "name" field.
+	// 名称
 	Name string `json:"name,omitempty"`
+	// 价格
+	Price string `json:"price,omitempty"`
 	// ProductID holds the value of the "product_id" field.
 	ProductID string `json:"product_id,omitempty"`
-	// Quantity holds the value of the "quantity" field.
+	// 库存
 	Quantity int32 `json:"quantity,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
@@ -37,7 +39,7 @@ func (*Stock) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case stock.FieldID, stock.FieldQuantity:
 			values[i] = new(sql.NullInt64)
-		case stock.FieldName, stock.FieldProductID:
+		case stock.FieldName, stock.FieldPrice, stock.FieldProductID:
 			values[i] = new(sql.NullString)
 		case stock.FieldCreatedAt, stock.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -67,6 +69,12 @@ func (s *Stock) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				s.Name = value.String
+			}
+		case stock.FieldPrice:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field price", values[i])
+			} else if value.Valid {
+				s.Price = value.String
 			}
 		case stock.FieldProductID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -130,6 +138,9 @@ func (s *Stock) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
 	builder.WriteString("name=")
 	builder.WriteString(s.Name)
+	builder.WriteString(", ")
+	builder.WriteString("price=")
+	builder.WriteString(s.Price)
 	builder.WriteString(", ")
 	builder.WriteString("product_id=")
 	builder.WriteString(s.ProductID)
