@@ -10,6 +10,7 @@ import (
 
 	"github.com/WlayRay/order-demo/common/broker"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
+	"github.com/WlayRay/order-demo/goods/infrastructure/stats"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
@@ -20,7 +21,8 @@ type OrderService interface {
 }
 
 type Consumer struct {
-	orderGRPC OrderService
+	orderGRPC  OrderService
+	goodsStats *stats.PrometheusStats
 }
 
 type order struct {
@@ -31,9 +33,10 @@ type order struct {
 	Items       []*orderpb.Item
 }
 
-func NewConsumer(orderGRPC OrderService) *Consumer {
+func NewConsumer(orderGRPC OrderService, goodsStats *stats.PrometheusStats) *Consumer {
 	return &Consumer{
-		orderGRPC: orderGRPC,
+		orderGRPC:  orderGRPC,
+		goodsStats: goodsStats,
 	}
 }
 
@@ -85,6 +88,7 @@ func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Que
 		err = errors.New("order has not paid yet")
 	}
 	outbound(o)
+	go c.goodsStats.IncSalesVolume(o.Items[0].Name, "无", "无", 1) // 记录商品销售量
 	span.AddEvent(fmt.Sprintf("order.cook: %+v", o))
 	if err := c.orderGRPC.UpdateOrder(ctx, &orderpb.Order{
 		ID:          o.ID,
@@ -105,6 +109,6 @@ func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Que
 
 func outbound(o *order) {
 	zap.L().Debug("order id paid, goods ready to outbound", zap.Int("goods num", len(o.Items)))
-	time.Sleep(3 * time.Second)
+	time.Sleep(2 * time.Second)
 	zap.L().Debug("outbound success", zap.String("order id", o.ID), zap.String("customer id", o.CustomerID))
 }

@@ -1,22 +1,25 @@
 package metrics
 
 import (
+	"net/http"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 type PrometheusMetricsClient struct {
 	registry *prometheus.Registry
 }
 
-var dynamicCounter = prometheus.NewCounterVec(
-	prometheus.CounterOpts{
-		Name: "dynamic_counter",
-		Help: "count_custom_keys",
-	}, []string{"key"})
+var (
+	dynamicCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "dynamic_counter",
+			Help: "Interface information",
+		}, []string{"key"})
+)
 
 type PrometheusMetricsClientConfig struct {
 	Host        string
@@ -49,7 +52,6 @@ func (p PrometheusMetricsClient) initPrometheus(conf *PrometheusMetricsClientCon
 			zap.L().Fatal("Failed to start metrics server", zap.Error(err))
 		}
 	}()
-
 }
 
 func (p PrometheusMetricsClient) Inc(key string, value int) {

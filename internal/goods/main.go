@@ -2,16 +2,18 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/WlayRay/order-demo/common/broker"
 	grpcClient "github.com/WlayRay/order-demo/common/client"
 	_ "github.com/WlayRay/order-demo/common/config"
 	"github.com/WlayRay/order-demo/common/logging"
 	"github.com/WlayRay/order-demo/goods/adaptors"
 	"github.com/WlayRay/order-demo/goods/infrastructure/consumer"
+	"github.com/WlayRay/order-demo/goods/infrastructure/stats"
 	"go.uber.org/zap"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/WlayRay/order-demo/common/tracing"
 	"github.com/spf13/viper"
@@ -53,15 +55,13 @@ func main() {
 	}()
 
 	orderGRPC := adaptors.NewOrderGRPC(orderClient)
-	go consumer.NewConsumer(orderGRPC).Listen(ch)
+	promStats := stats.NewPrometheusStats(viper.GetString("goods.metrics-export-addr"), serviceName)
+	promStats.Start()
+	go consumer.NewConsumer(orderGRPC, promStats).Listen(ch)
 
 	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
-	for {
-		select {
-		case <-signalCh:
-			zap.L().Info("Received shutdown signal, shutting down gracefully...")
-			os.Exit(0)
-		}
-	}
+	<-signalCh
+	zap.L().Info("Received shutdown signal, shutting down gracefully...")
+	os.Exit(0)
 }

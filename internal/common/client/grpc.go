@@ -3,6 +3,9 @@ package grpcClient
 import (
 	"context"
 	"errors"
+	"net"
+	"time"
+
 	"github.com/WlayRay/order-demo/common/discovery"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/common/genproto/stockpb"
@@ -11,8 +14,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"net"
-	"time"
 )
 
 func NewStockGRPCClient(ctx context.Context) (stockpb.StockServiceClient, func() error, error) {
@@ -71,12 +72,10 @@ func grpcDialOpts(_ string) []grpc.DialOption {
 }
 
 func WaitForOrderGRPCClient(timeout time.Duration) bool {
-	zap.L().Info("waiting for order service", zap.Duration("timeout", timeout))
 	return waitFor(viper.GetString("order.grpc-addr"), timeout)
 }
 
 func WaitForStockGRPCClient(timeout time.Duration) bool {
-	zap.L().Info("waiting for stock service", zap.Duration("timeout", timeout))
 	return waitFor(viper.GetString("stock.grpc-addr"), timeout)
 }
 
@@ -89,7 +88,7 @@ func waitFor(addr string, timeout time.Duration) bool {
 		for {
 			select {
 			case <-timeoutCh:
-				zap.L().Fatal("timeout waiting for grpc server", zap.String("addr", addr))
+				zap.L().Fatal("timeout waiting for grpc server", zap.String("addr", addr), zap.Duration("timeout", timeout))
 				return
 			default:
 				conn, err := net.Dial("tcp", addr)
