@@ -2,7 +2,7 @@
 global:
   scrape_interval: 15s # 数据采集间隔，默认15秒
   evaluation_interval: 15s # 规则评估间隔，默认15秒
-  scrape_timeout: 10s # 单次采集超时时间，默认10秒
+  scrape_timeout: 5s # 单次采集超时时间，默认5秒
 
 ## Alertmanager 配置（可选）
 #alerting:
@@ -22,4 +22,13 @@ scrape_configs:
     metrics_path: "/metrics"
     scrape_interval: 5s
     static_configs:
-      - targets: ['host.docker.internal:9123', 'host.docker.internal:9124', 'host.docker.internal:9125'] # Prometheus 自身的地址
+      - targets: [
+            "host.docker.internal:9123",
+            "host.docker.internal:9124",
+            "host.docker.internal:9125",
+          ] # Prometheus 拉取数据的地址
+  - job_name: "goods-metrics"
+    metrics_path: "/metrics"
+    scrape_interval: 2s
+    static_configs:
+      - targets: ["host.docker.internal:9126"]

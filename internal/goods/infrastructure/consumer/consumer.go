@@ -87,8 +87,11 @@ func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Que
 	if o.Status != "paid" {
 		err = errors.New("order has not paid yet")
 	}
-	outbound(o)
-	go c.goodsStats.IncSalesVolume(o.Items[0].Name, "无", "无", 1) // 记录商品销售量
+	outbound(o) // 处理出库逻辑
+	// 记录商品销售量
+	for _, good := range o.Items {
+		go c.goodsStats.IncSalesVolume(good.Name, "待添加", "待添加", int(good.Quantity))
+	}
 	span.AddEvent(fmt.Sprintf("order.cook: %+v", o))
 	if err := c.orderGRPC.UpdateOrder(ctx, &orderpb.Order{
 		ID:          o.ID,
@@ -107,6 +110,7 @@ func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Que
 	zap.L().Info("consumed successfully")
 }
 
+// outbound simulates the outbound process of goods.
 func outbound(o *order) {
 	zap.L().Debug("order id paid, goods ready to outbound", zap.Int("goods num", len(o.Items)))
 	time.Sleep(2 * time.Second)
