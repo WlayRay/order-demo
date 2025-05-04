@@ -34,15 +34,20 @@ func NewPrometheusMetricsClient(config *PrometheusMetricsClientConfig) *Promethe
 
 func (p PrometheusMetricsClient) initPrometheus(conf *PrometheusMetricsClientConfig) {
 	p.registry = prometheus.NewRegistry()
-	p.registry.MustRegister(collectors.NewGoCollector(), collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 
-	// custom collector
-	if err := p.registry.Register(dynamicCounter); err != nil {
+	wr := prometheus.WrapRegistererWith(
+		prometheus.Labels{"serviceName": conf.ServiceName},
+		p.registry,
+	)
+
+	wr.MustRegister(
+		collectors.NewGoCollector(),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+	)
+
+	if err := wr.Register(dynamicCounter); err != nil {
 		panic(err)
 	}
-
-	// metadata wrap
-	prometheus.WrapRegistererWith(prometheus.Labels{"serviceName": conf.ServiceName}, p.registry)
 
 	// export
 	http.Handle("/metrics", promhttp.HandlerFor(p.registry, promhttp.HandlerOpts{}))

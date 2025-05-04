@@ -22,18 +22,24 @@ type PrometheusStats struct {
 
 func NewPrometheusStats(host string, serviceName string) *PrometheusStats {
 	return &PrometheusStats{
-		registry:    prometheus.NewRegistry(),
-		host:        host,
-		serviceName: serviceName,
+		registry:     prometheus.NewRegistry(),
+		host:         host,
+		serviceName:  serviceName,
+		GoodsMetrics: newGoodsMetrics(),
 	}
 }
 
 func (p *PrometheusStats) Start() error {
-	p.registry.MustRegister(collectors.NewGoCollector(), collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
-	p.GoodsMetrics = newGoodsMetrics(p.registry)
+	wr := prometheus.WrapRegistererWith(
+		prometheus.Labels{"serviceName": p.serviceName},
+		p.registry,
+	)
 
-	// metadata wrap
-	prometheus.WrapRegistererWith(prometheus.Labels{"serviceName": p.serviceName}, p.registry)
+	wr.MustRegister(
+		collectors.NewGoCollector(),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+		p.GoodsMetrics.salesVolumeCounter,
+	)
 
 	// export
 	http.Handle("/metrics", promhttp.HandlerFor(p.registry, promhttp.HandlerOpts{}))
@@ -47,7 +53,7 @@ func (p *PrometheusStats) Start() error {
 	return nil
 }
 
-func newGoodsMetrics(registerer prometheus.Registerer) *GoodsMetrics {
+func newGoodsMetrics() *GoodsMetrics {
 	goodsMetrics := &GoodsMetrics{}
 	goodsMetrics.salesVolumeCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -56,7 +62,6 @@ func newGoodsMetrics(registerer prometheus.Registerer) *GoodsMetrics {
 		},
 		[]string{"name", "category", "brand"},
 	)
-	registerer.MustRegister(goodsMetrics.salesVolumeCounter)
 	return goodsMetrics
 }
 
