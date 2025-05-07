@@ -67,6 +67,24 @@
             background: #388e3c;
         }
 
+        .back-to-shop-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 8px 20px;
+            background: #2193b0;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: large;
+            cursor: pointer;
+            box-shadow: 1px 1px 1px 1px rgba(63, 62, 62, 0.8);
+            transition: background 0.3s ease;
+        }
+
+        .back-to-shop-btn:hover {
+            background: #1b7a8f;
+        }
+
         .hidden {
             display: none;
         }
@@ -77,6 +95,10 @@
     <section id="main-section">
         <p id="order-message">您已成功下单！</p>
         <p id="order-status">订单状态：<span id="orderStatus">等待中...</span></p>
+        <button id="backToShop" class="back-to-shop-btn"
+            onclick="window.location.href='http://127.0.0.1:5500/public/index.html'">
+            回到购物界面
+        </button>
         <div class="ready-popup">
             <p>您的订单正在处理中...请稍后</p>
             <p style="color: #2193b0; margin: 12px;">订单号：<b><span id="orderId"></span></b></p>
@@ -128,6 +150,7 @@
                     document.getElementById('orderStatus').innerText = order.Status;
                     document.getElementById('order-message').classList.remove('hidden');
                     document.getElementById('order-status').classList.remove('hidden');
+                    document.getElementById('backToShop').style.display = 'block';  // 显示返回购物按钮
                 } else {
                     setTimeout(getOrder, 5000);
                 }
