@@ -2,4 +2,4 @@
 .gobincache/
 **/tmp
 **/bin
-.idea/
+.idea
