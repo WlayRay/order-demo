@@ -81,12 +81,9 @@ func (s StockRepositoryPG) UpdateStock(
 	}
 
 	// 确保事务最终会被提交或回滚
-	rollback := true
 	defer func() {
-		if rollback {
-			if err := tx.Rollback(); err != nil {
-				zap.L().Error("transaction rollback failed", zap.Error(err))
-			}
+		if err := tx.Rollback(); err != nil {
+			zap.L().Error("transaction rollback failed", zap.Error(err))
 		}
 	}()
 
@@ -122,7 +119,6 @@ func (s StockRepositoryPG) UpdateStock(
 		return fmt.Errorf("commit transaction failed: %w", err)
 	}
 
-	rollback = false
 	return nil
 }
 

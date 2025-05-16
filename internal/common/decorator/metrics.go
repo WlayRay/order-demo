@@ -2,14 +2,16 @@ package decorator
 
 import (
 	"fmt"
-	"golang.org/x/net/context"
 	"strings"
 	"time"
+
+	"golang.org/x/net/context"
 )
 
 // MetricsClient is an interface for metrics clients.
 type MetricsClient interface {
 	Inc(key string, value int)
+	Observe(key string, value float64)
 }
 
 type queryMetricsDecorator[C, R any] struct {
@@ -22,7 +24,7 @@ func (q queryMetricsDecorator[C, R]) Handle(ctx context.Context, cmd C) (result 
 	actionName := strings.ToLower(generateActionName(cmd))
 	defer func() {
 		end := time.Since(start)
-		q.client.Inc(fmt.Sprintf("%s.%s", actionName, "duration"), int(end.Milliseconds()))
+		q.client.Observe(fmt.Sprintf("%s.%s", actionName, "duration"), float64(end.Milliseconds()))
 		if err == nil {
 			q.client.Inc(fmt.Sprintf("%s.%s", actionName, "success"), 1)
 		} else {
@@ -43,7 +45,7 @@ func (q commandMetricsDecorator[C, R]) Handle(ctx context.Context, cmd C) (resul
 	actionName := strings.ToLower(generateActionName(cmd))
 	defer func() {
 		end := time.Since(start)
-		q.client.Inc(fmt.Sprintf("%s.%s", actionName, "duration"), int(end.Milliseconds()))
+		q.client.Observe(fmt.Sprintf("%s.%s", actionName, "duration"), float64(end.Milliseconds()))
 		if err == nil {
 			q.client.Inc(fmt.Sprintf("%s.%s", actionName, "success"), 1)
 		} else {

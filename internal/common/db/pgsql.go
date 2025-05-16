@@ -2,13 +2,14 @@ package db
 
 import (
 	"context"
+	"fmt"
+	"time"
+
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"fmt"
 	_ "github.com/WlayRay/order-demo/common/config"
 	_ "github.com/lib/pq" // 驱动导入
 	"github.com/spf13/viper"
-	"time"
 )
 
 var (

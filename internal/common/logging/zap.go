@@ -7,10 +7,9 @@ import (
 )
 
 func Init() {
-	var config zap.Config
-	config = zap.NewDevelopmentConfig()
+	config := zap.NewDevelopmentConfig()
 	config.Encoding = "json"
-	
+
 	config.EncoderConfig = zapcore.EncoderConfig{
 		TimeKey:        "time",          // 时间字段名称
 		LevelKey:       "level",         // 日志级别字段名称

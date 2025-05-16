@@ -60,13 +60,13 @@ func (o OrderRepositoryPG) Create(ctx context.Context, order *domain.Order) (*do
 	}
 
 	h := fnv.New64a()
-	h.Write([]byte(ip))
-	instance, err := lib.GetSnowflakeInstance(h.Sum64()%1024, 10*time.Millisecond)
+	_, _ = h.Write([]byte(ip))
+	snowflakeInstance, err := lib.GetSnowflakeInstance(h.Sum64()%1024, 10*time.Millisecond)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create snowflake instance: %w", err)
+		return nil, fmt.Errorf("failed to create snowflake snowflake instance: %w", err)
 	}
 
-	id, err := instance.GetID()
+	id, err := snowflakeInstance.GetID()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get snowflake ID: %w", err)
 	}

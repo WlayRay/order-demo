@@ -2,9 +2,10 @@ package tracing
 
 import (
 	"context"
+
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -19,12 +20,15 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(context.Context) er
 		panic("empty jaeger URL")
 	}
 	tracer = otel.Tracer(serviceName)
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(jaegerURL)))
+	exp, err := otlptracehttp.New(context.Background(),
+		otlptracehttp.WithEndpoint(jaegerURL),
+		otlptracehttp.WithInsecure(),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	sampler := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(1.0)) // 追踪采样率
+	sampler := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(0.5)) // 追踪采样率
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sampler),
 		sdktrace.WithBatcher(exp),

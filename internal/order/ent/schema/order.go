@@ -49,7 +49,7 @@ func (Order) Fields() []ent.Field {
 			}).
 			Optional(),
 
-		field.JSON("items", map[string]interface{}{}).
+		field.JSON("items", map[string]any{}).
 			SchemaType(map[string]string{
 				dialect.Postgres: "JSONB",
 			}),

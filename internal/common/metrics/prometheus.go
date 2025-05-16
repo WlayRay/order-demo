@@ -14,10 +14,16 @@ type PrometheusMetricsClient struct {
 }
 
 var (
-	dynamicCounter = prometheus.NewCounterVec(
+	requestCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "dynamic_counter",
-			Help: "Interface information",
+			Help: "The number of successful and failed execution of business methods",
+		}, []string{"key"})
+
+	requestDuration = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name: "dynamic_duration",
+			Help: "The duration of successful and failed execution of business methods",
 		}, []string{"key"})
 )
 
@@ -45,7 +51,10 @@ func (p PrometheusMetricsClient) initPrometheus(conf *PrometheusMetricsClientCon
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
 	)
 
-	if err := wr.Register(dynamicCounter); err != nil {
+	if err := wr.Register(requestCounter); err != nil {
+		panic(err)
+	}
+	if err := wr.Register(requestDuration); err != nil {
 		panic(err)
 	}
 
@@ -60,5 +69,9 @@ func (p PrometheusMetricsClient) initPrometheus(conf *PrometheusMetricsClientCon
 }
 
 func (p PrometheusMetricsClient) Inc(key string, value int) {
-	dynamicCounter.WithLabelValues(key).Add(float64(value))
+	requestCounter.WithLabelValues(key).Add(float64(value))
+}
+
+func (p PrometheusMetricsClient) Observe(key string, value float64) {
+	requestDuration.WithLabelValues(key).Observe(value)
 }

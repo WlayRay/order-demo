@@ -21,11 +21,11 @@ func RunGRPCServer(serviceName string, registerServer func(server *grpc.Server))
 			zap.L().Fatal("both grpc-addr and fallback-grpc-addr are empty, cannot start server")
 		}
 	}
-	RunGRPCServerOnAddr(addr, registerServer)
+	runGRPCServerOnAddr(addr, registerServer)
 }
 
-// RunGRPCServerOnAddr starts a gRPC server on a specified address.
-func RunGRPCServerOnAddr(addr string, registerServer func(server *grpc.Server)) {
+// runGRPCServerOnAddr starts a gRPC server on a specified address.
+func runGRPCServerOnAddr(addr string, registerServer func(server *grpc.Server)) {
 	grpcServer := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainUnaryInterceptor(

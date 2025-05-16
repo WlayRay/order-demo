@@ -82,6 +82,6 @@ func (s *Snowflake) GetID() (uint64, error) {
 
 	s.lastTimestamp = timestamp
 
-	id := ((timestamp << timestampShift) | (s.workerID << workerIDShift) | s.number)
+	id := (timestamp << timestampShift) | (s.workerID << workerIDShift) | s.number
 	return id, nil
 }
