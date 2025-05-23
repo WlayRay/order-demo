@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // Order holds the schema definition for the Order entity.
@@ -52,6 +53,17 @@ func (Order) Fields() []ent.Field {
 		field.JSON("items", map[string]any{}).
 			SchemaType(map[string]string{
 				dialect.Postgres: "JSONB",
+			}),
+		field.Time("created_at").
+			Default(func() time.Time {
+				return time.Now()
+			}),
+		field.Time("updated_at").
+			Default(func() time.Time {
+				return time.Now()
+			}).
+			UpdateDefault(func() time.Time {
+				return time.Now()
 			}),
 	}
 }

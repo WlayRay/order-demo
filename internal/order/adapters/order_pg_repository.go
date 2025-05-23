@@ -58,7 +58,6 @@ func (o OrderRepositoryPG) Create(ctx context.Context, order *domain.Order) (*do
 	if err != nil {
 		return nil, fmt.Errorf("failed to get local IP: %w", err)
 	}
-
 	h := fnv.New64a()
 	_, _ = h.Write([]byte(ip))
 	snowflakeInstance, err := lib.GetSnowflakeInstance(h.Sum64()%1024, 10*time.Millisecond)
@@ -152,15 +151,7 @@ func (o OrderRepositoryPG) Update(ctx context.Context, order *domain.Order, upda
 	}
 
 	// 转换商品数据
-	itemsData := make(map[string]any, len(updatedOrder.Items))
-	for i, item := range updatedOrder.Items {
-		itemsData[fmt.Sprintf("item-%d", i)] = &entity.Item{
-			ID:       item.ID,
-			Name:     item.Name,
-			PriceID:  item.PriceID,
-			Quantity: item.Quantity,
-		}
-	}
+	itemsData := convertItemsToMap(updatedOrder)
 
 	// 执行更新操作
 	count, err := tx.Order.Update().
@@ -194,25 +185,15 @@ func (o OrderRepositoryPG) Update(ctx context.Context, order *domain.Order, upda
 	return nil
 }
 
-//func QueryOrdersWithQuantityGT2() []*ent.OrderRecord {
-//	client := NewEntClient()
-//	defer func() { _ = client.Close() }()
-//
-//	result, err := client.OrderRecord.Query().
-//		Select(
-//			"order_id",
-//			"customer_id",
-//			"total_amount",
-//			"order_details",
-//			"shipping_address",
-//			"status",
-//		).Where(func(s *sql.Selector) {
-//		s.Where(sql.ExprP(
-//			`(order_details->'items'->0->>'quantity')::int > 2`))
-//	}).All(context.Background())
-//
-//	if err != nil {
-//		log.Fatalf("failed querying orders: %v", err)
-//	}
-//	return result
-//}
+func convertItemsToMap(updatedOrder *domain.Order) map[string]any {
+	itemsData := make(map[string]any, len(updatedOrder.Items))
+	for i, item := range updatedOrder.Items {
+		itemsData[fmt.Sprintf("item-%d", i)] = &entity.Item{
+			ID:       item.ID,
+			Name:     item.Name,
+			PriceID:  item.PriceID,
+			Quantity: item.Quantity,
+		}
+	}
+	return itemsData
+}

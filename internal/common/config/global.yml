@@ -3,7 +3,8 @@ zap-level: debug
 dial-grpc-timeout: 12s
 
 jaeger:
-  url: "http://127.0.0.1:14268/api/traces"
+  url: "127.0.0.1:4318"
+  sampling-rate: 0.5
 
 etcd:
   endpoints:

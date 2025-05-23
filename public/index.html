@@ -305,7 +305,7 @@
             const quantity = parseInt(dialog.querySelector('#quantity-input').value) || 1;
             const customerID = "5216"; // 固定的 customerID
 
-            fetch('http://localhost:9000/api/customer/1024/orders', {
+            fetch('http://localhost:9000/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

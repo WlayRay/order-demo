@@ -28,7 +28,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	shutdown, err := tracing.InitJaegerProvider(viper.GetString("jaeger.url"), serviceName)
+	shutdown, err := tracing.InitJaegerProvider(viper.GetString("jaeger.url"), serviceName, viper.GetFloat64("jaeger.sampling-rate"))
 	if err != nil {
 		panic(err.Error())
 	}

@@ -38,16 +38,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /customer/{customerID}/orders:
+  /orders:
     post:
       description: "create order"
-      parameters:
-        - in: path
-          name: customerID
-          schema:
-            type: string
-          required: true
-
       requestBody:
         required: false
         content:

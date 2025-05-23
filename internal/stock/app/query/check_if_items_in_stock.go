@@ -59,22 +59,23 @@ func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfIte
 	}()
 
 	res := make([]*entity.Item, 0, len(query.Items))
-	infos, err := c.stockRepo.GetItemInfo(ctx, query.Items[0].ID)
-	if err != nil {
-		zap.L().Error("GetItemInfo", zap.String("productID", query.Items[0].ID), zap.Error(err))
-		return nil, err
-	}
 	for i, item := range query.Items {
 		priceID, err := c.stripeAPI.GetPriceByProductID(ctx, item.ID)
 		if err != nil || priceID == "" {
 			zap.L().Warn("GetPriceByProductID", zap.String("productID", item.ID), zap.Error(err))
 			return nil, err
 		}
+
+		info, err := c.stockRepo.GetItemInfo(ctx, query.Items[i].ID, "name")
+		if err != nil {
+			zap.L().Error("GetItemInfo", zap.String("productID", query.Items[i].ID), zap.Error(err))
+			return nil, err
+		}
 		res = append(res, &entity.Item{
 			ID:       query.Items[i].ID,
 			Quantity: query.Items[i].Quantity,
 			PriceID:  priceID,
-			Name:     infos.Name,
+			Name:     info.Name,
 		})
 	}
 	// TODO: 拆分出扣减库存的逻辑（如果需要的话）

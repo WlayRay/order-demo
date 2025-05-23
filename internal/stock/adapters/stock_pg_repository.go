@@ -33,10 +33,10 @@ func NewEntClient() *ent.Client {
 	return client
 }
 
-func (s StockRepositoryPG) GetItemInfo(ctx context.Context, id string) (*entity.ItemInfo, error) {
+func (s StockRepositoryPG) GetItemInfo(ctx context.Context, id string, fields ...string) (*entity.ItemInfo, error) {
 	data, err := s.db.Stock.Query().
+		Select(fields...).
 		Where(stockModel.ProductID(id)).
-		Select(stockModel.FieldName, stockModel.FieldPrice, stockModel.FieldCreatedAt, stockModel.FieldUpdatedAt).
 		First(ctx)
 	if err != nil {
 		return nil, err
@@ -53,8 +53,8 @@ func (s StockRepositoryPG) GetItemInfo(ctx context.Context, id string) (*entity.
 
 func (s StockRepositoryPG) GetStock(ctx context.Context, ids []string) ([]*entity.ItemWithQuantity, error) {
 	data, err := s.db.Stock.Query().
-		Where(stockModel.ProductIDIn(ids...)).
 		Select(stockModel.FieldProductID, stockModel.FieldQuantity).
+		Where(stockModel.ProductIDIn(ids...)).
 		All(ctx)
 	if err != nil {
 		return nil, err
@@ -82,8 +82,12 @@ func (s StockRepositoryPG) UpdateStock(
 
 	// 确保事务最终会被提交或回滚
 	defer func() {
-		if err := tx.Rollback(); err != nil {
-			zap.L().Error("transaction rollback failed", zap.Error(err))
+		if p := recover(); p != nil {
+			zap.L().Error("panic occurred during transaction", zap.Any("panic", p))
+			_ = tx.Rollback()
+			panic(p)
+		} else if err != nil {
+			_ = tx.Rollback()
 		}
 	}()
 
@@ -110,7 +114,8 @@ func (s StockRepositoryPG) UpdateStock(
 	for _, item := range currentItems {
 		if err := tx.Stock.Update().
 			Where(stockModel.ProductID(item.ID)).
-			SetQuantity(item.Quantity).Exec(ctx); err != nil {
+			SetQuantity(item.Quantity).
+			Exec(ctx); err != nil {
 			return fmt.Errorf("update stock failed: %w", err)
 		}
 	}

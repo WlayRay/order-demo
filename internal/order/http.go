@@ -18,7 +18,7 @@ type HTTPServer struct {
 	common.BaseResponse
 }
 
-func (H HTTPServer) PostCustomerCustomerIDOrders(c *gin.Context, customerID string) {
+func (H HTTPServer) PostOrders(c *gin.Context) {
 	var (
 		req  client.CreateOrderRequest
 		resp dto.CreateOrderResponse

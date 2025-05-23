@@ -15,7 +15,7 @@ import (
 
 var tracer = otel.Tracer("default_tracer")
 
-func InitJaegerProvider(jaegerURL, serviceName string) (func(context.Context) error, error) {
+func InitJaegerProvider(jaegerURL, serviceName string, sampleRate float64) (func(context.Context) error, error) {
 	if jaegerURL == "" {
 		panic("empty jaeger URL")
 	}
@@ -28,7 +28,7 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(context.Context) er
 		return nil, err
 	}
 
-	sampler := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(0.5)) // 追踪采样率
+	sampler := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(sampleRate)) // 追踪采样率
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sampler),
 		sdktrace.WithBatcher(exp),
@@ -39,7 +39,9 @@ func InitJaegerProvider(jaegerURL, serviceName string) (func(context.Context) er
 	otel.SetTracerProvider(tp)
 	b3Propagator := b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader))
 	p := propagation.NewCompositeTextMapPropagator(
-		propagation.TraceContext{}, propagation.Baggage{}, b3Propagator)
+		propagation.TraceContext{},
+		propagation.Baggage{},
+		b3Propagator)
 	otel.SetTextMapPropagator(p)
 	return tp.Shutdown, nil
 }

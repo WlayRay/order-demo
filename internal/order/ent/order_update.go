@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -107,6 +108,26 @@ func (ou *OrderUpdate) SetItems(m map[string]interface{}) *OrderUpdate {
 	return ou
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (ou *OrderUpdate) SetCreatedAt(t time.Time) *OrderUpdate {
+	ou.mutation.SetCreatedAt(t)
+	return ou
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableCreatedAt(t *time.Time) *OrderUpdate {
+	if t != nil {
+		ou.SetCreatedAt(*t)
+	}
+	return ou
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (ou *OrderUpdate) SetUpdatedAt(t time.Time) *OrderUpdate {
+	ou.mutation.SetUpdatedAt(t)
+	return ou
+}
+
 // Mutation returns the OrderMutation object of the builder.
 func (ou *OrderUpdate) Mutation() *OrderMutation {
 	return ou.mutation
@@ -114,6 +135,7 @@ func (ou *OrderUpdate) Mutation() *OrderMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ou *OrderUpdate) Save(ctx context.Context) (int, error) {
+	ou.defaults()
 	return withHooks(ctx, ou.sqlSave, ou.mutation, ou.hooks)
 }
 
@@ -136,6 +158,14 @@ func (ou *OrderUpdate) Exec(ctx context.Context) error {
 func (ou *OrderUpdate) ExecX(ctx context.Context) {
 	if err := ou.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ou *OrderUpdate) defaults() {
+	if _, ok := ou.mutation.UpdatedAt(); !ok {
+		v := order.UpdateDefaultUpdatedAt()
+		ou.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -184,6 +214,12 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := ou.mutation.Items(); ok {
 		_spec.SetField(order.FieldItems, field.TypeJSON, value)
+	}
+	if value, ok := ou.mutation.CreatedAt(); ok {
+		_spec.SetField(order.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := ou.mutation.UpdatedAt(); ok {
+		_spec.SetField(order.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ou.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -285,6 +321,26 @@ func (ouo *OrderUpdateOne) SetItems(m map[string]interface{}) *OrderUpdateOne {
 	return ouo
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (ouo *OrderUpdateOne) SetCreatedAt(t time.Time) *OrderUpdateOne {
+	ouo.mutation.SetCreatedAt(t)
+	return ouo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableCreatedAt(t *time.Time) *OrderUpdateOne {
+	if t != nil {
+		ouo.SetCreatedAt(*t)
+	}
+	return ouo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (ouo *OrderUpdateOne) SetUpdatedAt(t time.Time) *OrderUpdateOne {
+	ouo.mutation.SetUpdatedAt(t)
+	return ouo
+}
+
 // Mutation returns the OrderMutation object of the builder.
 func (ouo *OrderUpdateOne) Mutation() *OrderMutation {
 	return ouo.mutation
@@ -305,6 +361,7 @@ func (ouo *OrderUpdateOne) Select(field string, fields ...string) *OrderUpdateOn
 
 // Save executes the query and returns the updated Order entity.
 func (ouo *OrderUpdateOne) Save(ctx context.Context) (*Order, error) {
+	ouo.defaults()
 	return withHooks(ctx, ouo.sqlSave, ouo.mutation, ouo.hooks)
 }
 
@@ -327,6 +384,14 @@ func (ouo *OrderUpdateOne) Exec(ctx context.Context) error {
 func (ouo *OrderUpdateOne) ExecX(ctx context.Context) {
 	if err := ouo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (ouo *OrderUpdateOne) defaults() {
+	if _, ok := ouo.mutation.UpdatedAt(); !ok {
+		v := order.UpdateDefaultUpdatedAt()
+		ouo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -392,6 +457,12 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 	}
 	if value, ok := ouo.mutation.Items(); ok {
 		_spec.SetField(order.FieldItems, field.TypeJSON, value)
+	}
+	if value, ok := ouo.mutation.CreatedAt(); ok {
+		_spec.SetField(order.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := ouo.mutation.UpdatedAt(); ok {
+		_spec.SetField(order.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &Order{config: ouo.config}
 	_spec.Assign = _node.assignValues

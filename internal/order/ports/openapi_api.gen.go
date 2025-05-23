@@ -14,11 +14,11 @@ import (
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
-	// (POST /customer/{customerID}/orders)
-	PostCustomerCustomerIDOrders(c *gin.Context, customerID string)
-
 	// (GET /customer/{customerID}/orders/{orderID})
 	GetCustomerCustomerIDOrdersOrderID(c *gin.Context, customerID string, orderID string)
+
+	// (POST /orders)
+	PostOrders(c *gin.Context)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -29,30 +29,6 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(c *gin.Context)
-
-// PostCustomerCustomerIDOrders operation middleware
-func (siw *ServerInterfaceWrapper) PostCustomerCustomerIDOrders(c *gin.Context) {
-
-	var err error
-
-	// ------------- Path parameter "customerID" -------------
-	var customerID string
-
-	err = runtime.BindStyledParameterWithOptions("simple", "customerID", c.Param("customerID"), &customerID, runtime.BindStyledParameterOptions{Explode: false, Required: true})
-	if err != nil {
-		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter customerID: %w", err), http.StatusBadRequest)
-		return
-	}
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		middleware(c)
-		if c.IsAborted() {
-			return
-		}
-	}
-
-	siw.Handler.PostCustomerCustomerIDOrders(c, customerID)
-}
 
 // GetCustomerCustomerIDOrdersOrderID operation middleware
 func (siw *ServerInterfaceWrapper) GetCustomerCustomerIDOrdersOrderID(c *gin.Context) {
@@ -87,6 +63,19 @@ func (siw *ServerInterfaceWrapper) GetCustomerCustomerIDOrdersOrderID(c *gin.Con
 	siw.Handler.GetCustomerCustomerIDOrdersOrderID(c, customerID, orderID)
 }
 
+// PostOrders operation middleware
+func (siw *ServerInterfaceWrapper) PostOrders(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.PostOrders(c)
+}
+
 // GinServerOptions provides options for the Gin server.
 type GinServerOptions struct {
 	BaseURL      string
@@ -114,6 +103,6 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
-	router.POST(options.BaseURL+"/customer/:customerID/orders", wrapper.PostCustomerCustomerIDOrders)
 	router.GET(options.BaseURL+"/customer/:customerID/orders/:orderID", wrapper.GetCustomerCustomerIDOrdersOrderID)
+	router.POST(options.BaseURL+"/orders", wrapper.PostOrders)
 }

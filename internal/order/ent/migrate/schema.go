@@ -16,6 +16,8 @@ var (
 		{Name: "status", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "VARCHAR(30)"}},
 		{Name: "payment_link", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "VARCHAR(800)"}},
 		{Name: "items", Type: field.TypeJSON, SchemaType: map[string]string{"postgres": "JSONB"}},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// OrdersTable holds the schema information for the "orders" table.
 	OrdersTable = &schema.Table{

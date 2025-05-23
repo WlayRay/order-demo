@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/common/tracing"
@@ -48,12 +49,17 @@ func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.O
 		"items":       string(marshalItems),
 		"paymentLink": order.PaymentLink,
 	}
+
+	// 设置30分钟后超时
+	expiresAt := stripe.Int64(time.Now().Add(30 * time.Minute).Unix())
+
 	params := &stripe.CheckoutSessionParams{
 		Metadata:   metadata,
 		LineItems:  items,
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
 		SuccessURL: stripe.String(fmt.Sprintf("%s?customerID=%s&orderID=%s", successURL, order.CustomerID, order.ID)),
 		CancelURL:  stripe.String(cancelURL),
+		ExpiresAt:  expiresAt,
 	}
 	result, err := session.New(params)
 	if err != nil {

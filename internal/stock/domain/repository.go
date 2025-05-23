@@ -9,7 +9,7 @@ import (
 )
 
 type Repository interface {
-	GetItemInfo(ctx context.Context, id string) (*entity.ItemInfo, error)
+	GetItemInfo(ctx context.Context, id string, fields ...string) (*entity.ItemInfo, error)
 	GetStock(ctx context.Context, ids []string) ([]*entity.ItemWithQuantity, error)
 	UpdateStock(ctx context.Context,
 		query []*entity.ItemWithQuantity,

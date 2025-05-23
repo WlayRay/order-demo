@@ -3,6 +3,8 @@
 package ent
 
 import (
+	"time"
+
 	"github.com/WlayRay/order-demo/order/ent/order"
 	"github.com/WlayRay/order-demo/order/ent/schema"
 )
@@ -17,4 +19,14 @@ func init() {
 	orderDescCustomerID := orderFields[2].Descriptor()
 	// order.CustomerIDValidator is a validator for the "customer_id" field. It is called by the builders before save.
 	order.CustomerIDValidator = orderDescCustomerID.Validators[0].(func(string) error)
+	// orderDescCreatedAt is the schema descriptor for created_at field.
+	orderDescCreatedAt := orderFields[6].Descriptor()
+	// order.DefaultCreatedAt holds the default value on creation for the created_at field.
+	order.DefaultCreatedAt = orderDescCreatedAt.Default.(func() time.Time)
+	// orderDescUpdatedAt is the schema descriptor for updated_at field.
+	orderDescUpdatedAt := orderFields[7].Descriptor()
+	// order.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	order.DefaultUpdatedAt = orderDescUpdatedAt.Default.(func() time.Time)
+	// order.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	order.UpdateDefaultUpdatedAt = orderDescUpdatedAt.UpdateDefault.(func() time.Time)
 }
