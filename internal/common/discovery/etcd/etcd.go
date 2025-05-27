@@ -21,9 +21,7 @@ func GetRegistry() (*Registry, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Registry{
-		client: etcdClient,
-	}, nil
+	return &Registry{client: etcdClient}, nil
 }
 
 // Register registers a service instance in etcd.
@@ -60,6 +58,7 @@ func (r Registry) Discover(ctx context.Context, serviceName string) ([]string, e
 	if err != nil {
 		return nil, err
 	}
+
 	addresses := make([]string, 0, resp.Count)
 	for _, kv := range resp.Kvs {
 		ips := strings.Split(string(kv.Key), "/")
@@ -70,7 +69,7 @@ func (r Registry) Discover(ctx context.Context, serviceName string) ([]string, e
 
 // HealthCheck checks the health of a service instance in etcd.
 func (r Registry) HealthCheck(instanceID, serviceName string) error {
-	ctx := context.Background()
+	ctx := context.TODO()
 
 	// 获取服务实例的所有键
 	prefix := "/" + serviceName + "/" + instanceID
@@ -85,7 +84,7 @@ func (r Registry) HealthCheck(instanceID, serviceName string) error {
 
 	// 为每个键续租
 	for _, kv := range resp.Kvs {
-		leaseResp, err := r.client.Grant(ctx, 60) // 创建3秒的租约
+		leaseResp, err := r.client.Grant(ctx, 3) // 创建3秒的租约
 		if err != nil {
 			return err
 		}
@@ -95,28 +94,6 @@ func (r Registry) HealthCheck(instanceID, serviceName string) error {
 		if err != nil {
 			return err
 		}
-
-		// 自动续租
-		keepAliveChan, keepAliveErr := r.client.KeepAlive(ctx, leaseResp.ID)
-		if keepAliveErr != nil {
-			return keepAliveErr
-		}
-
-		// 处理续租响应
-		go func() {
-			for resp := range keepAliveChan {
-				if resp == nil {
-					zap.L().Warn("keep alive channel closed",
-						zap.String("serviceName", serviceName),
-						zap.String("instanceID", instanceID))
-					return
-				}
-				/*zap.L().Debug("keep alive success",
-				zap.String("serviceName", serviceName),
-				zap.String("instanceID", instanceID),
-				zap.Int64("ttl", resp.TTL))*/
-			}
-		}()
 	}
 
 	return nil

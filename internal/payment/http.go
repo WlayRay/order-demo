@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/WlayRay/order-demo/common/broker"
+	_ "github.com/WlayRay/order-demo/common/config"
 	"github.com/WlayRay/order-demo/common/genproto/orderpb"
 	"github.com/WlayRay/order-demo/payment/domain"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
@@ -28,6 +30,9 @@ func NewPaymentHandler(ch *amqp.Channel) *PaymentHandler {
 }
 
 func (h *PaymentHandler) RegisterRoutes(c *gin.Engine) {
+	if viper.GetBool("enable-profiling") {
+		pprof.Register(c)
+	}
 	c.POST("/api/webhook", h.handleWebhook)
 }
 

@@ -3,7 +3,8 @@ package discovery
 import (
 	"context"
 	"fmt"
-	"math/rand"
+	"github.com/WlayRay/order-demo/common/lib"
+	"hash/fnv"
 	"time"
 )
 
@@ -16,6 +17,18 @@ type Registry interface {
 
 // GenerateInstanceID generates a unique instance ID for a service.
 func GenerateInstanceID(serviceName string) string {
-	x := rand.New(rand.NewSource(time.Now().Unix()))
-	return fmt.Sprintf("%s-%d", serviceName, x.Uint64())
+	var err error
+	defer func() {
+		if err != nil {
+			panic(err)
+		}
+	}()
+	ip, err := lib.GetLocalIP()
+
+	h := fnv.New64a()
+	_, _ = h.Write([]byte(ip))
+	snowflakeInstance, err := lib.GetSnowflakeInstance(h.Sum64()%1024, 10*time.Millisecond)
+
+	id, err := snowflakeInstance.GetID()
+	return fmt.Sprintf("%s-%d", serviceName, id)
 }

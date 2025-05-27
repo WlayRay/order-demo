@@ -14,12 +14,7 @@ import (
 func RunGRPCServer(serviceName string, registerServer func(server *grpc.Server)) {
 	addr := viper.Sub(serviceName).GetString("grpc-addr")
 	if addr == "" {
-		zap.L().Warn("grpc-addr not found in config, using fallback-grpc-addr",
-			zap.String("service", serviceName))
-		addr = viper.GetString("fallback-grpc-addr")
-		if addr == "" {
-			zap.L().Fatal("both grpc-addr and fallback-grpc-addr are empty, cannot start server")
-		}
+		zap.L().Warn("grpc-addr not found in config, using fallback-grpc-addr", zap.String("service", serviceName))
 	}
 	runGRPCServerOnAddr(addr, registerServer)
 }

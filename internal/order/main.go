@@ -12,6 +12,7 @@ import (
 	"github.com/WlayRay/order-demo/order/infrastructure/consumer"
 	"github.com/WlayRay/order-demo/order/ports"
 	"github.com/WlayRay/order-demo/order/service"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -66,6 +67,10 @@ func main() {
 	})
 
 	server.RunHTTPServer(serviceName, func(router *gin.Engine) {
+		if viper.GetBool("enable-profiling") {
+			pprof.Register(router)
+		}
+
 		router.StaticFile("/success", "..\\..\\public\\success.html")
 		ports.RegisterHandlersWithOptions(router, HTTPServer{
 			app: application,

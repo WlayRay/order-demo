@@ -102,7 +102,10 @@ func (c createOrderHandler) validate(ctx context.Context, items []*entity.ItemWi
 	if len(items) == 0 {
 		return nil, errors.New("must have at least one item")
 	}
-	items = packItems(items)
+	items, err := packItems(items)
+	if err != nil {
+		return nil, err
+	}
 	resp, err := c.stockGRPC.CheckItemsInStock(ctx, convertor.GetItemWithQuantityConvertor().EntitiesToProto(items))
 	if err != nil {
 		return nil, err
@@ -111,17 +114,20 @@ func (c createOrderHandler) validate(ctx context.Context, items []*entity.ItemWi
 	return convertor.GetItemConvertor().ProtoToEntities(resp.Items), nil
 }
 
-func packItems(items []*entity.ItemWithQuantity) []*entity.ItemWithQuantity {
-	merged := make(map[string]int32)
+func packItems(items []*entity.ItemWithQuantity) ([]*entity.ItemWithQuantity, error) {
+	merged := make(map[string]int32, len(items))
 	for _, item := range items {
+		if item.Quantity <= 0 {
+			return nil, errors.New("item quantity must be greater than 0")
+		}
 		merged[item.ID] += item.Quantity
 	}
-	var res []*entity.ItemWithQuantity
+	res := make([]*entity.ItemWithQuantity, 0, len(merged))
 	for id, quantity := range merged {
 		res = append(res, &entity.ItemWithQuantity{
 			ID:       id,
 			Quantity: quantity,
 		})
 	}
-	return res
+	return res, nil
 }
