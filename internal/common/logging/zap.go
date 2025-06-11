@@ -10,6 +10,8 @@ func Init() {
 	config := zap.NewDevelopmentConfig()
 	config.Encoding = "json"
 
+	zapLevel := viper.GetString("zap-level")
+
 	config.EncoderConfig = zapcore.EncoderConfig{
 		TimeKey:        "time",          // 时间字段名称
 		LevelKey:       "level",         // 日志级别字段名称
@@ -25,7 +27,6 @@ func Init() {
 		EncodeCaller:   zapcore.ShortCallerEncoder, // 调用栈路径简化
 	}
 
-	zapLevel := viper.GetString("zap-level")
 	switch zapLevel {
 	case "debug":
 		config.Level = zap.NewAtomicLevelAt(zapcore.DebugLevel)

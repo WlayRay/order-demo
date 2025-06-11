@@ -34,8 +34,7 @@ func InitJaegerProvider(jaegerURL, serviceName string, sampleRate float64) (func
 		sdktrace.WithBatcher(exp),
 		sdktrace.WithResource(resource.NewSchemaless(
 			semconv.ServiceNameKey.String(serviceName),
-		)),
-	)
+		)))
 	otel.SetTracerProvider(tp)
 	b3Propagator := b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader))
 	p := propagation.NewCompositeTextMapPropagator(

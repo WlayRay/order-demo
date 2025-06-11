@@ -46,12 +46,14 @@ func NewCheckIfItemsInStockHandler(stockRepo domain.Repository,
 }
 
 func (c checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfItemsInStock) ([]*entity.Item, error) {
-	session, mutex, err := lock(ctx, getLockKey(query))
+	timeoutCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+	session, mutex, err := lock(timeoutCtx, getLockKey(query))
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
-		releaseErr := mutex.Unlock(ctx)
+		releaseErr := mutex.Unlock(timeoutCtx)
 		closeErr := session.Close()
 		if releaseErr != nil || closeErr != nil {
 			zap.L().Warn("etcd unlock failed", zap.Error(releaseErr), zap.Error(closeErr))

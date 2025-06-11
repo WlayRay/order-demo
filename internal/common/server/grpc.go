@@ -1,20 +1,21 @@
 package server
 
 import (
+	"net"
+
 	grpcZap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpcTags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-	"net"
 )
 
 // RunGRPCServer starts a gRPC server.
 func RunGRPCServer(serviceName string, registerServer func(server *grpc.Server)) {
 	addr := viper.Sub(serviceName).GetString("grpc-addr")
 	if addr == "" {
-		zap.L().Warn("grpc-addr not found in config, using fallback-grpc-addr", zap.String("service", serviceName))
+		zap.L().Fatal("grpc-addr not found in config", zap.String("service", serviceName))
 	}
 	runGRPCServerOnAddr(addr, registerServer)
 }

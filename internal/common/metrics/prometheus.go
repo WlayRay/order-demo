@@ -23,8 +23,8 @@ var (
 	requestDuration = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "dynamic_duration",
-			Help:    "The duration of successful and failed execution of business methods",
-			Buckets: prometheus.DefBuckets,
+			Help:    "The duration(millisecond) of successful and failed execution of business methods",
+			Buckets: []float64{100, 200, 300, 500, 800, 1500, 3000, 5000},
 		}, []string{"key"})
 )
 
